@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧮 Simulador ODE — Epidemia SI y Crecimiento Poblacional (Págs. 23–42)</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#38bdf8;
+        --accent2:#f472b6;--ok:#34d399;--warn:#fbbf24;--border:#334155;}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif;}
+  body{background:linear-gradient(160deg,#0f172a,#1e293b);color:var(--text);min-height:100vh;padding:22px;}
+  header{text-align:center;margin-bottom:14px;}
+  header h1{font-size:1.5rem;} header p{color:var(--muted);margin-top:6px;font-size:.92rem;}
+  .tabs{display:flex;gap:10px;justify-content:center;margin:16px 0;}
+  .tab{padding:10px 22px;border-radius:999px;border:1px solid var(--border);background:var(--card);
+       color:var(--muted);cursor:pointer;font-weight:600;}
+  .tab.active{background:var(--accent);color:#082f49;border-color:var(--accent);}
+  .grid{display:grid;grid-template-columns:1fr 340px;gap:16px;max-width:1200px;margin:0 auto;}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+  @media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+  .stat .t{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .stat .v{font-size:1.25rem;font-weight:700;color:var(--accent);margin:4px 0;}
+  .stat .s{font-size:.72rem;color:var(--muted);}
+  canvas{width:100%;height:380px;background:#0b1220;border-radius:10px;}
+  label{display:block;font-size:.82rem;color:var(--muted);margin:10px 0 4px;}
+  input[type=range]{width:100%;accent-color:var(--accent);}
+  input[type=checkbox]{accent-color:var(--accent);}
+  h3{font-size:.95rem;margin-bottom:6px;}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  button{padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+         color:var(--text);cursor:pointer;font-weight:600;}
+  button:hover{border-color:var(--accent);}
+  #btn-play{background:var(--accent);color:#082f49;border-color:var(--accent);}
+  .eq{background:#0b1220;border:1px solid var(--border);border-radius:10px;padding:12px;
+      font-family:Consolas,monospace;font-size:.85rem;line-height:1.7;white-space:pre-wrap;}
+  ul{margin:8px 0 0 18px;font-size:.85rem;color:var(--muted);line-height:1.6;}
+  footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:18px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧮 Simulador de Ecuaciones Diferenciales Ordinarias</h1>
+  <p>Modelo de contagio SI (curva sigmoidea) y crecimiento exponencial → logístico · ODEs-2.pdf págs. 23–42</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" id="tab-ep">🦠 Epidemia (SI)</button>
+  <button class="tab" id="tab-pop"> Crecimiento poblacional</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="t" id="s1t">—</div><div class="v" id="s1v">—</div><div class="s" id="s1s"></div></div>
+  <div class="stat"><div class="t" id="s2t">—</div><div class="v" id="s2v">—</div><div class="s" id="s2s"></div></div>
+  <div class="stat"><div class="t" id="s3t">—</div><div class="v" id="s3v">—</div><div class="s" id="s3s"></div></div>
+  <div class="stat"><div class="t" id="s4t">—</div><div class="v" id="s4v">—</div><div class="s" id="s4s"></div></div>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card"><canvas id="plot"></canvas></div>
+    <div class="card"><h3>📐 Ecuaciones del modelo</h3><div class="eq" id="eqbox"></div></div>
+    <div class="card"><h3>🧪 Supuestos del modelo (Regla de Oro del Modelado)</h3><ul id="assump"></ul></div>
+  </div>
+  <div>
+    <div class="card" id="panel-ep">
+      <h3>⚙️ Parámetros — Epidemia</h3>
+      <label>Fracción inicial infectada x₀ = <span id="v-x0"></span></label>
+      <input type="range" id="p-x0" min="0.001" max="0.5" step="0.001" value="0.02">
+      <label>Tasa de propagación r = <span id="v-r"></span> (1/día)</label>
+      <input type="range" id="p-r" min="0.05" max="1.5" step="0.05" value="0.5">
+      <label>Días a simular = <span id="v-tmax"></span></label>
+      <input type="range" id="p-tmax" min="5" max="120" step="5" value="30">
+      <label>Población total P = <span id="v-P"></span> (para contar casos)</label>
+      <input type="range" id="p-P" min="100" max="100000" step="100" value="1000">
+    </div>
+    <div class="card" id="panel-pop" style="display:none">
+      <h3>⚙️ Parámetros — Población</h3>
+      <label>Población inicial X₀ = <span id="v-X0"></span></label>
+      <input type="range" id="p-X0" min="1" max="1000" step="1" value="100">
+      <label>Tasa de crecimiento r = <span id="v-rp"></span> (1/unidad t)</label>
+      <input type="range" id="p-rp" min="0.001" max="1" step="0.001" value="0.05">
+      <label>Capacidad de carga K = <span id="v-K"></span></label>
+      <input type="range" id="p-K" min="500" max="200000" step="500" value="10000">
+      <label>Tiempo máximo = <span id="v-tpmax"></span></label>
+      <input type="range" id="p-tpmax" min="10" max="500" step="10" value="240">
+      <label><input type="checkbox" id="p-log" checked> Escala logarítmica en Y</label>
+    </div>
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn-play">▶ Simular</button>
+        <button id="btn-reset">⟲ Reiniciar</button>
+        <button id="btn-csv">⬇ CSV</button>
+      </div>
+      <label>Velocidad: <span id="v-speed">1</span>x</label>
+      <input type="range" id="p-speed" min="1" max="5" step="1" value="1">
+      <label>Tiempo actual t = <span id="v-day">0</span></label>
+      <input type="range" id="p-day" min="0" max="30" step="0.1" value="0">
+    </div>
+  </div>
+</div>
+
+<footer>⚠️ El modelo SI nunca supera el 100% de la población y el logístico nunca supera K ·
+Basado en ODEs-2.pdf (págs. 23–42)</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const S={model:'ep',ep:{x0:0.02,r:0.5,tmax:30,P:1000},pop:{X0:100,r:0.05,K:10000,tmax:240,log:true},
+         day:0,playing:false,speed:1,lastTs:null};
+
+/* ---------- Modelos (soluciones analíticas del PDF) ---------- */
+const epX =(t,x0,r)=>1/(1+((1-x0)/x0)*Math.exp(-r*t));
+const popE=(t,X0,r)=>X0*Math.exp(r*t);
+const popL=(t,X0,r,K)=>K/(1+(K/X0-1)*Math.exp(-r*t));
+const tInfEp=(x0,r)=>Math.log((1-x0)/x0)/r;
+const tInfPop=(X0,K,r)=>(K>X0)?Math.log(K/X0-1)/r:NaN;
+const fmt=v=>!isFinite(v)?'—':(v>=1e6?v.toExponential(2):v>=1000?Math.round(v).toLocaleString('es'):v>=10?v.toFixed(1):v.toFixed(2));
+
+/* ---------- Estadísticas ---------- */
+function stats(){
+  if(S.model==='ep'){
+    const{x0,r,P}=S.ep, x=epX(S.day,x0,r), dx=r*x*(1-x), ti=tInfEp(x0,r);
+    $('s1t').textContent='Fracción infectada x(t)'; $('s1v').textContent=x.toFixed(4); $('s1s').textContent=(x*100).toFixed(2)+'% de la población';
+    $('s2t').textContent='Casos infectados';        $('s2v').textContent=fmt(x*P);    $('s2s').textContent='de '+P.toLocaleString('es');
+    $('s3t').textContent='Nuevos casos/día';        $('s3v').textContent=fmt(dx*P);   $('s3s').textContent='dx/dt = '+(dx).toFixed(4);
+    $('s4t').textContent='Inflexión (x=0.5)';       $('s4v').textContent=ti.toFixed(2)+' d'; $('s4s').textContent='Fase 2 → Fase 3';
+  }else{
+    const{X0,r,K}=S.pop, Xe=popE(S.day,X0,r), Xl=popL(S.day,X0,r), ti=tInfPop(X0,K,r);
+    $('s1t').textContent='X exponencial';  $('s1v').textContent=fmt(Xe); $('s1s').textContent='X₀·e^(rt)';
+    $('s2t').textContent='X logístico';    $('s2v').textContent=fmt(Xl); $('s2s').textContent='saturando en K';
+    $('s3t').textContent='Capacidad K';    $('s3v').textContent=fmt(K);  $('s3s').textContent='límite sostenible';
+    $('s4t').textContent='Inflexión (K/2)';$('s4v').textContent=isFinite(ti)?ti.toFixed(1):'—'; $('s4s').textContent='t donde crece más rápido';
+  }
+}
+
+/* ---------- Dibujo ---------- */
+function draw(){
+  const c=$('plot'),ctx=c.getContext('2d');
+  c.width=c.clientWidth; c.height=380;
+  const L=62,R=14,T=16,B=42,w=c.width-L-R,h=c.height-T-B;
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.strokeStyle='#334155'; ctx.fillStyle='#94a3b8'; ctx.font='11px Segoe UI'; ctx.lineWidth=1;
+
+  if(S.model==='ep'){
+    const xmax=S.ep.tmax, X=t=>L+t/xmax*w, Y=v=>T+(1-v)*h;
+    for(let i=0;i<=5;i++){const v=i/5;ctx.beginPath();ctx.moveTo(L,Y(v));ctx.lineTo(L+w,Y(v));ctx.stroke();
+      ctx.fillText(v.toFixed(1),L-26,Y(v)+4);}
+    for(let i=0;i<=6;i++){const t=xmax*i/6;ctx.fillText(t.toFixed(0),X(t)-6,T+h+16);}
+    ctx.setLineDash([4,4]);ctx.strokeStyle='#64748b';
+    ctx.beginPath();ctx.moveTo(L,Y(0.5));ctx.lineTo(L+w,Y(0.5));ctx.stroke();
+    const ti=tInfEp(S.ep.x0,S.ep.r);
+    if(ti<=xmax){ctx.beginPath();ctx.moveTo(X(ti),T);ctx.lineTo(X(ti),T+h);ctx.stroke();}
+    ctx.setLineDash([]);ctx.strokeStyle='#38bdf8';ctx.lineWidth=2.5;ctx.beginPath();
+    for(let i=0;i<=400;i++){const t=xmax*i/400,v=epX(t,S.ep.x0,S.ep.r);i?ctx.lineTo(X(t),Y(v)):ctx.moveTo(X(t),Y(v));}
+    ctx.stroke();
+    ctx.strokeStyle='#f472b6';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(X(S.day),T);ctx.lineTo(X(S.day),T+h);ctx.stroke();
+    ctx.fillStyle='#f472b6';ctx.beginPath();ctx.arc(X(S.day),Y(epX(S.day,S.ep.x0,S.ep.r)),5,0,7);ctx.fill();
+    ctx.fillStyle='#94a3b8';
+    ctx.fillText('Tiempo (días)',L+w/2-30,c.height-6);
+    ctx.save();ctx.translate(14,T+h/2+40);ctx.rotate(-Math.PI/2);ctx.fillText('Fracción infectada x',0,0);ctx.restore();
+  }else{
+    const{X0,r,K,log}=S.pop,xmax=S.pop.tmax;
+    const ymin=log?Math.max(1,X0/2):0, ymax=log?Math.max(K*2,X0*10):Math.max(K*1.15,X0*1.2);
+    const X=t=>L+t/xmax*w;
+    const Y=v=>log?T+(1-(Math.log10(Math.max(v,ymin))-Math.log10(ymin))/(Math.log10(ymax)-Math.log10(ymin)))*h
+                  :T+(1-(v-ymin)/(ymax-ymin))*h;
+    ctx.strokeStyle='#334155';
+    if(log){for(let p=Math.ceil(Math.log10(ymin));p<=Math.floor(Math.log10(ymax));p++){
+      const v=Math.pow(10,p);ctx.beginPath();ctx.moveTo(L,Y(v));ctx.lineTo(L+w,Y(v));ctx.stroke();
+      ctx.fillText('1e'+p,L-32,Y(v)+4);}}
+    else{for(let i=0;i<=4;i++){const v=ymin+(ymax-ymin)*i/4;ctx.beginPath();ctx.moveTo(L,Y(v));ctx.lineTo(L+w,Y(v));ctx.stroke();
+      ctx.fillText(fmt(v),L-40,Y(v)+4);}}
+    for(let i=0;i<=6;i++){const t=xmax*i/6;ctx.fillText(t.toFixed(0),X(t)-6,T+h+16);}
+    ctx.save();ctx.beginPath();ctx.rect(L,T,w,h);ctx.clip();
+    ctx.setLineDash([5,4]);ctx.strokeStyle='#ef4444';
+    ctx.beginPath();ctx.moveTo(L,Y(K));ctx.lineTo(L+w,Y(K));ctx.stroke();
+    ctx.setLineDash([2,3]);ctx.strokeStyle='#64748b';
+    ctx.beginPath();ctx.moveTo(L,Y(K/2));ctx.lineTo(L+w,Y(K/2));ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle='#fb923c';ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<=400;i++){const t=xmax*i/400;i?ctx.lineTo(X(t),Y(popE(t,X0,r))):ctx.moveTo(X(t),Y(popE(t,X0,r)));}ctx.stroke();
+    ctx.strokeStyle='#2dd4bf';ctx.lineWidth=2.5;ctx.beginPath();
+    for(let i=0;i<=400;i++){const t=xmax*i/400;i?ctx.lineTo(X(t),Y(popL(t,X0,r,K))):ctx.moveTo(X(t),Y(popL(t,X0,r,K)));}ctx.stroke();
+    ctx.strokeStyle='#f472b6';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(X(S.day),T);ctx.lineTo(X(S.day),T+h);ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle='#fb923c';ctx.fillText('— Exponencial X₀e^(rt)',L+10,T+14);
+    ctx.fillStyle='#2dd4bf';ctx.fillText('— Logística (satura en K)',L+10,T+28);
+    ctx.fillStyle='#94a3b8';ctx.fillText('Tiempo t',L+w/2-20,c.height-6);
+  }
+}
+
+/* ---------- Textos ---------- */
+function texts(){
+  if(S.model==='ep'){
+    const{x0,r}=S.ep;
+    $('eqbox').textContent=
+`ODE:        dx/dt = r·x·(1−x)          (no lineal: término x²)
+Solución:   x(t) = 1 / (1 + ((1−x₀)/x₀)·e^(−r·t))
+Valores:    x₀ = ${x0}   r = ${r} 1/día
+Hoy (t=${S.day.toFixed(1)}):  x = ${epX(S.day,x0,r).toFixed(6)}
+
+Fase 1: crecimiento lento inicial · Fase 2: aumento por contacto masivo
+Fase 3: saturación (la curva se aplana al 100%)`;
+    $('assump').innerHTML=
+`<li><b>Contacto directo:</b> el contagio solo ocurre por contacto físico directo.</li>
+ <li><b>Mezcla homogénea:</b> todos interactúan con todos (sin cuarentenas ni clústeres).</li>
+ <li><b>Población masiva:</b> variable continua, no discreta.</li>
+ <li><b>Población constante:</b> sin nacimientos ni muertes.</li>
+ <li><b>Sin recuperación:</b> nadie se cura (modelo SI).</li>`;
+  }else{
+    const{X0,r,K}=S.pop;
+    $('eqbox').textContent=
+`Exponencial: dX/dt = r·X            →  X(t) = X₀·e^(rt)   (curva en J)
+Logística:   dX/dt = r·X·(1−X/K)    →  X(t) = K/(1+(K/X₀−1)e^(−rt))
+Valores:     X₀ = ${X0}   r = ${r}   K = ${K}
+Límite t→∞:  X = K   ·   Inflexión en X = K/2`;
+    $('assump').innerHTML=
+`<li><b>Exponencial:</b> recursos infinitos, sin muerte ni límites → "paradoja del infinito".</li>
+ <li><b>Logística:</b> recursos estrictamente limitados por el entorno (capacidad de carga K).</li>
+ <li><b>Fase inicial (X≪K):</b> (1−X/K)≈1 → crece como exponencial pura.</li>
+ <li><b>Fase de saturación (X→K):</b> (1−X/K)→0 → dX/dt→0, crecimiento detenido.</li>`;
+  }
+}
+
+/* ---------- Animación y controles ---------- */
+function tick(ts){
+  if(!S.playing)return;
+  if(S.lastTs==null)S.lastTs=ts;
+  const dt=(ts-S.lastTs)/1000; S.lastTs=ts;
+  const tm=S.model==='ep'?S.ep.tmax:S.pop.tmax;
+  S.day=Math.min(tm,S.day+dt*S.speed*tm/12);
+  if(S.day>=tm)setPlaying(false);
+  $('p-day').value=S.day; $('v-day').textContent=S.day.toFixed(1);
+  stats(); draw(); texts();
+  if(S.playing)requestAnimationFrame(tick);
+}
+function setPlaying(v){S.playing=v;S.lastTs=null;$('btn-play').textContent=v?'⏸ Pausa':'▶ Simular';if(v)requestAnimationFrame(tick);}
+function updateAll(){stats();draw();texts();}
+
+function bind(id,key,obj,lab,dec){
+  $(id).addEventListener('input',e=>{obj[key]=parseFloat(e.target.value);$(lab).textContent=dec?obj[key].toFixed(dec):obj[key].toLocaleString('es');
+    if(key==='tmax'||key==='K'){const tm=S.model==='ep'?S.ep.tmax:S.pop.tmax;$('p-day').max=tm;S.day=Math.min(S.day,tm);}
+    updateAll();});
+}
+bind('p-x0','x0',S.ep,'v-x0',3); bind('p-r','r',S.ep,'v-r',2);
+bind('p-tmax','tmax',S.ep,'v-tmax',0); bind('p-P','P',S.ep,'v-P',0);
+bind('p-X0','X0',S.pop,'v-X0',0); bind('p-rp','r',S.pop,'v-rp',3);
+bind('p-K','K',S.pop,'v-K',0); bind('p-tpmax','tmax',S.pop,'v-tpmax',0);
+$('p-log').addEventListener('change',e=>{S.pop.log=e.target.checked;draw();});
+$('p-speed').addEventListener('input',e=>{S.speed=+e.target.value;$('v-speed').textContent=S.speed;});
+$('p-day').addEventListener('input',e=>{S.day=+e.target.value;$('v-day').textContent=S.day.toFixed(1);updateAll();});
+$('btn-play').onclick=()=>setPlaying(!S.playing);
+$('btn-reset').onclick=()=>{setPlaying(false);S.day=0;$('p-day').value=0;$('v-day').textContent='0';updateAll();};
+$('btn-csv').onclick=()=>{
+  const tm=S.model==='ep'?S.ep.tmax:S.pop.tmax; let rows=S.model==='ep'?'t,x_fraccion,casos\n':'t,X_exponencial,X_logistico\n';
+  for(let i=0;i<=200;i++){const t=tm*i/200;
+    rows+=S.model==='ep'?`${t.toFixed(2)},${epX(t,S.ep.x0,S.ep.r).toFixed(6)},${Math.round(epX(t,S.ep.x0,S.ep.r)*S.ep.P)}\n`
+      :`${t.toFixed(2)},${popE(t,S.pop.X0,S.pop.r).toExponential(4)},${popL(t,S.pop.X0,S.pop.r,S.pop.K).toFixed(2)}\n`;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv'}));
+  a.download='simulacion_odes.csv';a.click();};
+
+function setModel(m){
+  S.model=m;S.day=0;$('p-day').value=0;$('v-day').textContent='0';
+  $('tab-ep').classList.toggle('active',m==='ep');$('tab-pop').classList.toggle('active',m==='pop');
+  $('panel-ep').style.display=m==='ep'?'block':'none';$('panel-pop').style.display=m==='pop'?'block':'none';
+  $('p-day').max=m==='ep'?S.ep.tmax:S.pop.tmax;
+  setPlaying(false);updateAll();
+}
+$('tab-ep').onclick=()=>setModel('ep'); $('tab-pop').onclick=()=>setModel('pop');
+window.addEventListener('resize',draw);
+$('v-x0').textContent='0.020';$('v-r').textContent='0.50';$('v-tmax').textContent='30';$('v-P').textContent='1,000';
+$('v-X0').textContent='100';$('v-rp').textContent='0.050';$('v-K').textContent='10,000';$('v-tpmax').textContent='240';
+updateAll();
+</script>
+</body>
+</html>

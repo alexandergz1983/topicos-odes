@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧬 Simulador de Red Metabólica — Producción, Degradación y Dimerización (Págs. 1–22)</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--accent:#38bdf8;
+        --accent2:#f472b6;--ok:#34d399;--warn:#fbbf24;--border:#334155;}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif;}
+  body{background:linear-gradient(160deg,#0f172a,#1e293b);color:var(--text);min-height:100vh;padding:22px;}
+  header{text-align:center;margin-bottom:14px;}
+  header h1{font-size:1.5rem;} header p{color:var(--muted);margin-top:6px;font-size:.92rem;}
+  .grid{display:grid;grid-template-columns:1fr 350px;gap:16px;max-width:1250px;margin:0 auto;}
+  @media(max-width:950px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;max-width:1250px;margin-left:auto;margin-right:auto;}
+  @media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+  .stat .t{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+  .stat .v{font-size:1.25rem;font-weight:700;margin:4px 0;}
+  .stat .s{font-size:.7rem;color:var(--muted);}
+  .cX{color:#f87171}.cY{color:#38bdf8}.cXY{color:#fbbf24}.cOk{color:var(--ok)}
+  canvas{width:100%;background:#0b1220;border-radius:10px;}
+  #plot{height:360px} #plotcons{height:140px}
+  label{display:block;font-size:.8rem;color:var(--muted);margin:9px 0 3px;}
+  input[type=range]{width:100%;accent-color:var(--accent);}
+  input[type=checkbox]{accent-color:var(--accent);}
+  h3{font-size:.93rem;margin-bottom:6px;}
+  .rxhead{font-size:.78rem;color:var(--accent);margin-top:12px;font-weight:700;}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  button{padding:9px 16px;border-radius:10px;border:1px solid var(--border);background:var(--card);
+         color:var(--text);cursor:pointer;font-weight:600;}
+  button:hover{border-color:var(--accent);}
+  #btn-play{background:var(--accent);color:#082f49;border-color:var(--accent);}
+  .eq{background:#0b1220;border:1px solid var(--border);border-radius:10px;padding:12px;
+      font-family:Consolas,monospace;font-size:.82rem;line-height:1.65;white-space:pre-wrap;}
+  ol{margin:8px 0 0 20px;font-size:.84rem;color:var(--muted);line-height:1.7;}
+  ul{margin:8px 0 0 18px;font-size:.84rem;color:var(--muted);line-height:1.6;}
+  footer{text-align:center;color:var(--muted);font-size:.78rem;margin-top:16px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧬 Simulador de Red Metabólica — Proteínas en Acción</h1>
+  <p>Producción de novo (R1) · Degradación de X (R2) · Dimerización X+Y⇌XY (R3±) · Ecuación de conservación · ODEs-2.pdf págs. 1–22</p>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="t">Proteína X(t)</div><div class="v cX" id="s1v">—</div><div class="s" id="s1s"></div></div>
+  <div class="stat"><div class="t">Proteína Y(t)</div><div class="v cY" id="s2v">—</div><div class="s" id="s2s"></div></div>
+  <div class="stat"><div class="t">Dímero XY(t)</div><div class="v cXY" id="s3v">—</div><div class="s" id="s3s"></div></div>
+  <div class="stat"><div class="t">Conservación Y+XY</div><div class="v cOk" id="s4v">—</div><div class="s" id="s4s"></div></div>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card"><canvas id="plot"></canvas></div>
+    <div class="card"><h3>🔒 Verificación: Y(t) + XY(t) (ecuación de conservación)</h3><canvas id="plotcons"></canvas></div>
+    <div class="card"><h3>📐 Ecuaciones del sistema (con valores actuales)</h3><div class="eq" id="eqbox"></div></div>
+    <div class="card"><h3>👣 Receta del PVI — De la Biología a la Predicción</h3>
+      <ol>
+        <li><b>Dibujar:</b> representación visual del sistema (R1→R3).</li>
+        <li><b>Traducir:</b> de flechas a ecuaciones (términos + y −).</li>
+        <li><b>Simplificar:</b> ecuaciones de conservación → reducir 3D a 2D.</li>
+        <li><b>Definir:</b> condiciones iniciales x₀ y parámetros (k, E).</li>
+        <li><b>Equilibrar:</b> encontrar el estado estacionario (derivadas = 0).</li>
+        <li><b>Simular:</b> calcular el futuro en la computadora (este simulador).</li>
+        <li><b>Optimizar:</b> ajustar parámetros con datos reales.</li>
+        <li><b>Analizar:</b> probar la robustez del modelo.</li>
+      </ol>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <h3>⚙️ Parámetros por reacción</h3>
+      <div class="rxhead">R1 · Producción de novo de X: a = Xpre·kprod·Eprod</div>
+      <label>a = <span id="v-a"></span></label>
+      <input type="range" id="p-a" min="0" max="10" step="0.1" value="2.0">
+      <div class="rxhead">R2 · Degradación de X: b = kdeg·Edeg</div>
+      <label>b = <span id="v-b"></span></label>
+      <input type="range" id="p-b" min="0" max="2" step="0.05" value="0.3">
+      <div class="rxhead">R3+ · Dimerización: c = kdim·Edim &nbsp;|&nbsp; R3− · Disociación: d = kdis·Edis</div>
+      <label>c = <span id="v-c"></span></label>
+      <input type="range" id="p-c" min="0" max="2" step="0.05" value="0.5">
+      <label>d = <span id="v-d"></span></label>
+      <input type="range" id="p-d" min="0.05" max="2" step="0.05" value="0.4">
+      <div class="rxhead">R4 · Extensión ("el colaborador"): degradación de Y</div>
+      <label><input type="checkbox" id="p-degY"> Activar R4: −e·Y &nbsp;(¡rompe la conservación!)</label>
+      <label>e = kdegY·EdegY = <span id="v-e"></span></label>
+      <input type="range" id="p-e" min="0" max="2" step="0.05" value="0.2">
+      <div class="rxhead">Condiciones iniciales (PVI) y tiempo</div>
+      <label>Ytotal = <span id="v-Ytotal"></span> (constante si R4 está apagada)</label>
+      <input type="range" id="p-Ytotal" min="0.5" max="20" step="0.5" value="5">
+      <label>X₀ = <span id="v-X0"></span></label>
+      <input type="range" id="p-X0" min="0" max="20" step="0.5" value="0">
+      <label>Y₀ = <span id="v-Y0"></span> (XY₀ = Ytotal − Y₀)</label>
+      <input type="range" id="p-Y0" min="0" max="20" step="0.5" value="5">
+      <label>Tiempo máximo = <span id="v-tmax"></span></label>
+      <input type="range" id="p-tmax" min="5" max="200" step="5" value="50">
+    </div>
+    <div class="card">
+      <div class="btnrow">
+        <button id="btn-play">▶ Simular</button>
+        <button id="btn-reset">⟲ Reiniciar</button>
+        <button id="btn-csv">⬇ CSV</button>
+      </div>
+      <label>Velocidad: <span id="v-speed">1</span>x</label>
+      <input type="range" id="p-speed" min="1" max="5" step="1" value="1">
+      <label>Tiempo actual t = <span id="v-day">0</span></label>
+      <input type="range" id="p-day" min="0" max="50" step="0.1" value="0">
+    </div>
+    <div class="card"><h3>🪞 Efecto Espejo</h3>
+      <p style="font-size:.83rem;color:var(--muted)">Los términos que <b>restan</b> de X e Y por dimerización (−c·X·Y) son <b>exactamente los mismos</b> que <b>suman</b> a la creación de XY (+c·X·Y), y viceversa con la disociación. Por eso Y+XY se conserva cuando no hay producción ni degradación de Y.</p>
+    </div>
+  </div>
+</div>
+
+<footer>Integración numérica RK4 (Paso 6 de la receta: "Simular: calcular el futuro en la computadora") ·
+Estado estacionario: X* = a/b, &nbsp;Y* = Ytotal/(1+(c/d)·X*), &nbsp;XY* = Ytotal − Y*</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const N=4000;
+const S={a:2.0,b:0.3,c:0.5,d:0.4,e:0.2,degY:false,Ytotal:5,X0:0,Y0:5,tmax:50,
+         day:0,playing:false,speed:1,lastTs:null,data:[]};
+const fmt=v=>!isFinite(v)?'—':(Math.abs(v)>=1000?v.toFixed(0):Math.abs(v)>=100?v.toFixed(1):v.toFixed(2));
+
+/* ---------- Paso 6 de la receta: SIMULAR (RK4) ---------- */
+function simulate(){
+  const dt=S.tmax/N, XY0=Math.max(0,S.Ytotal-S.Y0);
+  let X=S.X0,Y=S.Y0,XY=XY0;
+  S.data=[{t:0,X,Y,XY}];
+  const f=(X,Y,XY)=>[S.a-S.b*X-S.c*X*Y+S.d*XY,
+                     -S.c*X*Y+S.d*XY-(S.degY?S.e*Y:0),
+                      S.c*X*Y-S.d*XY];
+  for(let i=1;i<=N;i++){
+    const k1=f(X,Y,XY);
+    const k2=f(X+dt/2*k1[0],Y+dt/2*k1[1],XY+dt/2*k1[2]);
+    const k3=f(X+dt/2*k2[0],Y+dt/2*k2[1],XY+dt/2*k2[2]);
+    const k4=f(X+dt*k3[0],Y+dt*k3[1],XY+dt*k3[2]);
+    X =Math.max(0,X +dt/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]));
+    Y =Math.max(0,Y +dt/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1]));
+    XY=Math.max(0,XY+dt/6*(k1[2]+2*k2[2]+2*k3[2]+k4[2]));
+    S.data.push({t:i*dt,X,Y,XY});
+  }
+}
+const atTime=t=>S.data[Math.min(N,Math.round(t/S.tmax*N))];
+
+/* ---------- Paso 5 de la receta: EQUILIBRAR ---------- */
+function steady(){
+  const Xs=S.b>0?S.a/S.b:NaN;
+  if(S.degY) return {X:Xs,Y:0,XY:0};
+  if(!isFinite(Xs)) return {X:NaN,Y:NaN,XY:NaN};
+  const q=S.c/S.d, Ys=S.Ytotal/(1+q*Xs);
+  return {X:Xs,Y:Ys,XY:S.Ytotal-Ys};
+}
+
+/* ---------- Estadísticas ---------- */
+function stats(){
+  const p=atTime(S.day), ss=steady();
+  $('s1v').textContent=fmt(p.X); $('s1s').textContent='estado estacionario X*='+fmt(ss.X);
+  $('s2v').textContent=fmt(p.Y); $('s2s').textContent='estado estacionario Y*='+fmt(ss.Y);
+  $('s3v').textContent=fmt(p.XY);$('s3s').textContent='estado estacionario XY*='+fmt(ss.XY);
+  const cons=p.Y+p.XY;
+  $('s4v').textContent=fmt(cons);
+  $('s4v').className='v '+(S.degY?'cX':'cOk');
+  $('s4s').textContent=S.degY?'✗ se pierde: d(Y+XY)/dt = −e·Y':'✓ constante = Ytotal='+S.Ytotal;
+}
+
+/* ---------- Dibujo principal ---------- */
+function draw(){
+  const c=$('plot'),ctx=c.getContext('2d');
+  c.width=c.clientWidth;c.height=360;
+  const L=58,R=14,T=16,B=40,w=c.width-L-R,h=c.height-T-B;
+  ctx.clearRect(0,0,c.width,c.height);
+  let ymax=1; for(const p of S.data) ymax=Math.max(ymax,p.X,p.Y,p.XY); ymax*=1.15;
+  const Xp=t=>L+t/S.tmax*w, Yp=v=>T+(1-v/ymax)*h;
+  ctx.strokeStyle='#334155';ctx.fillStyle='#94a3b8';ctx.font='11px Segoe UI';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const v=ymax*i/4;ctx.beginPath();ctx.moveTo(L,Yp(v));ctx.lineTo(L+w,Yp(v));ctx.stroke();ctx.fillText(fmt(v),L-40,Yp(v)+4);}
+  for(let i=0;i<=6;i++){const t=S.tmax*i/6;ctx.fillText(t.toFixed(0),Xp(t)-6,T+h+16);}
+  const ss=steady();
+  ctx.setLineDash([5,4]);ctx.lineWidth=1.2;
+  const hline=(v,col)=>{if(isFinite(v)&&v<=ymax){ctx.strokeStyle=col;ctx.beginPath();ctx.moveTo(L,Yp(v));ctx.lineTo(L+w,Yp(v));ctx.stroke();}};
+  hline(ss.X,'#f8717188');hline(ss.Y,'#38bdf888');hline(ss.XY,'#fbbf2488');
+  ctx.setLineDash([]);
+  const line=(key,col)=>{ctx.strokeStyle=col;ctx.lineWidth=2.4;ctx.beginPath();
+    S.data.forEach((p,i)=>{i?ctx.lineTo(Xp(p.t),Yp(p[key])):ctx.moveTo(Xp(p.t),Yp(p[key]));});ctx.stroke();};
+  line('X','#f87171');line('Y','#38bdf8');line('XY','#fbbf24');
+  const p=atTime(S.day);
+  ctx.strokeStyle='#e2e8f0';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(Xp(S.day),T);ctx.lineTo(Xp(S.day),T+h);ctx.stroke();
+  [[p.X,'#f87171'],[p.Y,'#38bdf8'],[p.XY,'#fbbf24']].forEach(([v,col])=>{
+    ctx.fillStyle=col;ctx.beginPath();ctx.arc(Xp(S.day),Yp(v),4.5,0,7);ctx.fill();});
+  ctx.fillStyle='#f87171';ctx.fillText('— X(t)',L+10,T+14);
+  ctx.fillStyle='#38bdf8';ctx.fillText('— Y(t)',L+70,T+14);
+  ctx.fillStyle='#fbbf24';ctx.fillText('— XY(t)',L+125,T+14);
+  ctx.fillStyle='#94a3b8';ctx.fillText('Tiempo t',L+w/2-20,c.height-6);
+}
+
+/* ---------- Verificación de conservación ---------- */
+function drawCons(){
+  const c=$('plotcons'),ctx=c.getContext('2d');
+  c.width=c.clientWidth;c.height=140;
+  const L=58,R=14,T=12,B=26,w=c.width-L-R,h=c.height-T-B;
+  ctx.clearRect(0,0,c.width,c.height);
+  let ymax=S.Ytotal*1.15;
+  for(const p of S.data) ymax=Math.max(ymax,(p.Y+p.XY)*1.1);
+  const Xp=t=>L+t/S.tmax*w, Yp=v=>T+(1-v/ymax)*h;
+  ctx.strokeStyle='#334155';ctx.fillStyle='#94a3b8';ctx.font='11px Segoe UI';
+  for(let i=0;i<=2;i++){const v=ymax*i/2;ctx.beginPath();ctx.moveTo(L,Yp(v));ctx.lineTo(L+w,Yp(v));ctx.stroke();ctx.fillText(fmt(v),L-40,Yp(v)+4);}
+  ctx.setLineDash([5,4]);ctx.strokeStyle='#34d399';
+  ctx.beginPath();ctx.moveTo(L,Yp(S.Ytotal));ctx.lineTo(L+w,Yp(S.Ytotal));ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle=S.degY?'#f87171':'#34d399';ctx.lineWidth=2.4;ctx.beginPath();
+  S.data.forEach((p,i)=>{const v=p.Y+p.XY;i?ctx.lineTo(Xp(p.t),Yp(v)):ctx.moveTo(Xp(p.t),Yp(v));});ctx.stroke();
+  ctx.fillStyle='#94a3b8';ctx.fillText('Y+XY vs t',L+8,T+12);
+}
+
+/* ---------- Texto de ecuaciones ---------- */
+function texts(){
+  const ss=steady(), r4=S.degY?'\nR4 activa:  dY/dt incluye −e·Y = −'+S.e+'·Y  →  la conservación se rompe':'';
+  $('eqbox').textContent=
+`R1  producción:    +a            = +${S.a}
+R2  degradación X: −b·X          = −${S.b}·X
+R3+ dimerización:  −c·X·Y        = −${S.c}·X·Y
+R3− disociación:   +d·XY         = +${S.d}·XY
+
+dX/dt  = ${S.a} − ${S.b}·X − ${S.c}·X·Y + ${S.d}·XY
+dY/dt  = −${S.c}·X·Y + ${S.d}·XY${S.degY?' − '+S.e+'·Y':''}
+dXY/dt = +${S.c}·X·Y − ${S.d}·XY
+
+Conservación: Y(t)+XY(t) = Ytotal = ${S.Ytotal}
+Estado estacionario: X*=${fmt(ss.X)}  Y*=${fmt(ss.Y)}  XY*=${fmt(ss.XY)}${r4}`;
+}
+
+/* ---------- Animación ---------- */
+function tick(ts){
+  if(!S.playing)return;
+  if(S.lastTs==null)S.lastTs=ts;
+  const dt=(ts-S.lastTs)/1000;S.lastTs=ts;
+  S.day=Math.min(S.tmax,S.day+dt*S.speed*S.tmax/12);
+  if(S.day>=S.tmax)setPlaying(false);
+  $('p-day').value=S.day;$('v-day').textContent=S.day.toFixed(1);
+  updateAll();
+  if(S.playing)requestAnimationFrame(tick);
+}
+function setPlaying(v){S.playing=v;S.lastTs=null;$('btn-play').textContent=v?'⏸ Pausa':'▶ Simular';if(v)requestAnimationFrame(tick);}
+function updateAll(){stats();draw();drawCons();texts();}
+function rebuild(){simulate();S.day=Math.min(S.day,S.tmax);updateAll();}
+
+/* ---------- Enlaces de controles ---------- */
+function bind(id,key,lab,dec){
+  $(id).addEventListener('input',e=>{S[key]=parseFloat(e.target.value);
+    $(lab).textContent=S[key].toFixed(dec);
+    if(key==='tmax'){$('p-day').max=S.tmax;}
+    if(key==='Ytotal'){$('p-Y0').max=S.Ytotal;if(S.Y0>S.Ytotal){S.Y0=S.Ytotal;$('p-Y0').value=S.Ytotal;$('v-Y0').textContent=S.Ytotal.toFixed(1);}}
+    rebuild();});
+}
+bind('p-a','a','v-a',1);bind('p-b','b','v-b',2);bind('p-c','c','v-c',2);
+bind('p-d','d','v-d',2);bind('p-e','e','v-e',2);
+bind('p-Ytotal','Ytotal','v-Ytotal',1);bind('p-X0','X0','v-X0',1);
+bind('p-Y0','Y0','v-Y0',1);bind('p-tmax','tmax','v-tmax',0);
+$('p-degY').addEventListener('change',e=>{S.degY=e.target.checked;rebuild();});
+$('p-speed').addEventListener('input',e=>{S.speed=+e.target.value;$('v-speed').textContent=S.speed;});
+$('p-day').addEventListener('input',e=>{S.day=+e.target.value;$('v-day').textContent=S.day.toFixed(1);updateAll();});
+$('btn-play').onclick=()=>setPlaying(!S.playing);
+$('btn-reset').onclick=()=>{setPlaying(false);S.day=0;$('p-day').value=0;$('v-day').textContent='0';updateAll();};
+$('btn-csv').onclick=()=>{
+  let rows='t,X,Y,XY\n';
+  for(let i=0;i<=N;i+=20){const p=S.data[i];rows+=`${p.t.toFixed(3)},${p.X.toFixed(6)},${p.Y.toFixed(6)},${p.XY.toFixed(6)}\n`;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv'}));
+  a.download='red_metabolica.csv';a.click();};
+window.addEventListener('resize',()=>{draw();drawCons();});
+$('v-a').textContent='2.0';$('v-b').textContent='0.30';$('v-c').textContent='0.50';$('v-d').textContent='0.40';
+$('v-e').textContent='0.20';$('v-Ytotal').textContent='5.0';$('v-X0').textContent='0.0';$('v-Y0').textContent='5.0';$('v-tmax').textContent='50';
+simulate();updateAll();
+</script>
+</body>
+</html>
