@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redes Regulatorias y Microambiente · Tutorial para estudiantes</title>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+
+<style>
+  :root {
+    --bg: #f5f8fc;
+    --card-bg: #ffffff;
+    --primary: #16324f;
+    --primary-hover: #1e4a72;
+    --accent: #22a06b;
+    --accent-light: #d1fae5;
+    --blue: #3b82f6;
+    --orange: #f59e0b;
+    --red: #dc2626;
+    --amber: #b45309;
+    --amber-light: #fef3c7;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    font-size: 16px;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    background: linear-gradient(165deg, #16324f 0%, #0a1e33 100%);
+    color: white;
+    padding: 2rem 1.25rem;
+    position: fixed;
+    top: 0; left: 0;
+    width: 300px;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    z-index: 100;
+  }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+  .sidebar-header {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-header .badge {
+    display: inline-block;
+    background: rgba(34, 160, 107, 0.2);
+    color: #6ee7b7;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .sidebar-header h1 {
+    font-size: 18px; font-weight: 700; line-height: 1.3;
+    margin-bottom: 6px; letter-spacing: -0.3px;
+  }
+  .sidebar-header p {
+    font-size: 12.5px; color: rgba(255,255,255,0.55); line-height: 1.5;
+  }
+  .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 13.5px; font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.06); color: white; }
+  .nav-link.active { background: rgba(34, 160, 107, 0.18); color: white; }
+  .nav-link.active::before {
+    content: ''; position: absolute; left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 20px;
+    background: var(--accent); border-radius: 0 3px 3px 0;
+  }
+  .nav-number {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .nav-link.active .nav-number { background: var(--accent); color: white; }
+
+  .main {
+    margin-left: 300px;
+    padding: 3rem 4rem 6rem 5rem;
+    max-width: 1200px;
+  }
+  .hero {
+    margin-bottom: 3.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 34px; font-weight: 800; letter-spacing: -0.8px;
+    color: var(--primary); line-height: 1.15; margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 17px; color: var(--text-light); max-width: 780px; line-height: 1.75;
+  }
+
+  .step { margin-bottom: 4.5rem; scroll-margin-top: 2rem; }
+  .step-header {
+    display: flex; align-items: flex-start; gap: 16px;
+    margin-bottom: 0.5rem;
+  }
+  .step-badge {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white; border-radius: var(--radius-sm);
+    font-weight: 800; font-size: 18px; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(22, 50, 79, 0.25);
+    margin-top: 2px;
+  }
+  .step-header h2 {
+    font-size: 22px; font-weight: 700; color: var(--primary);
+    letter-spacing: -0.4px; line-height: 1.3;
+  }
+  .step-sub {
+    font-size: 15px;
+    color: var(--text-light);
+    margin: 0 0 1.75rem 60px;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+    font-style: italic;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+  .card p { color: var(--text); margin-bottom: 0.75rem; }
+  .card p:last-child { margin-bottom: 0; }
+  .card h3 {
+    font-size: 15px; font-weight: 700; color: var(--primary);
+    margin-bottom: 0.85rem; display: flex; align-items: center; gap: 8px;
+  }
+  .card h3::before {
+    content: ''; width: 4px; height: 16px;
+    background: var(--accent); border-radius: 2px;
+  }
+  .card ul, .card ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+  .card ul li, .card ol li { margin-bottom: 7px; }
+
+  /* Cajas explicativas */
+  .tip {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1rem 0; font-size: 14.5px;
+  }
+  .tip strong { color: #065f46; }
+  .tip .tip-head {
+    display: block; font-size: 11.5px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #065f46; margin-bottom: 6px;
+  }
+  .note {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-left: 4px solid var(--orange);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1rem 0; font-size: 14.5px;
+  }
+  .note strong { color: #92400e; }
+  .note .note-head {
+    display: block; font-size: 11.5px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #92400e; margin-bottom: 6px;
+  }
+  /* Caja de lenguaje simple */
+  .simple {
+    background: #f7f9fc;
+    border: 1px solid #dbe4f0;
+    border-left: 4px solid #1e40af;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 15px;
+  }
+  .simple .simple-head {
+    display: block; font-size: 11.5px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #1e40af; margin-bottom: 8px;
+  }
+  .simple p { margin: 0 0 8px; }
+  .simple p:last-child { margin-bottom: 0; }
+  .simple ul { margin: 6px 0 0; padding-left: 1.25rem; }
+  .simple ul li { margin-bottom: 5px; }
+  /* Caja de analogía */
+  .analogy {
+    background: #fdf9ee;
+    border: 1px solid #f0e0be;
+    border-left: 4px solid #b45309;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 15px;
+  }
+  .analogy .analogy-head {
+    display: block; font-size: 11.5px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #92400e; margin-bottom: 8px;
+  }
+  .analogy p { margin: 0 0 8px; }
+  .analogy p:last-child { margin-bottom: 0; }
+
+  .math-box {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+  .math-box .mjx-container { font-size: 108% !important; }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .slider-row { display: flex; flex-direction: column; gap: 6px; }
+  .slider-row .label-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13.5px;
+  }
+  .slider-row label { font-weight: 600; color: var(--primary); }
+  .slider-value {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 12.5px; color: var(--accent); font-weight: 700;
+    background: var(--accent-light); padding: 2px 8px; border-radius: 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px; border-radius: 3px;
+    background: #e2e8f0; outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+    box-shadow: 0 2px 6px rgba(34, 160, 107, 0.4);
+    transition: transform 0.15s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: none;
+    box-shadow: 0 2px 6px rgba(34, 160, 107, 0.4);
+  }
+  select {
+    padding: 8px 12px; border-radius: 6px;
+    border: 1px solid var(--border); background: white;
+    font-size: 13.5px; font-family: inherit;
+    color: var(--primary); font-weight: 600;
+    width: 100%; cursor: pointer;
+  }
+
+  .plot-container {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    min-height: 380px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .plot-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+  .metric {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .metric:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .metric::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .metric.m-blue::before { background: var(--blue); }
+  .metric.m-orange::before { background: var(--orange); }
+  .metric.m-green::before { background: var(--accent); }
+  .metric .metric-label {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;
+  }
+  .metric .metric-value {
+    font-size: 22px; font-weight: 800; color: var(--primary);
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    letter-spacing: -0.5px;
+  }
+
+  .diagram-wrap {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: center;
+  }
+  .diagram-wrap img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px; }
+
+  @media (max-width: 1024px) {
+    .sidebar {
+      position: static;
+      width: 100%; height: auto;
+      padding: 1.25rem 1rem;
+    }
+    .nav-list { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+    .nav-link { padding: 6px 10px; font-size: 12px; }
+    .nav-number { width: 18px; height: 18px; font-size: 10px; }
+    .main { margin-left: 0; padding: 2rem 1.5rem 4rem; }
+    .hero h1 { font-size: 26px; }
+    .controls { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: 1fr; }
+    .plot-grid-2 { grid-template-columns: 1fr; }
+    .step-sub { margin-left: 0; }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 22px; }
+    .step-header h2 { font-size: 18px; }
+    .step-badge { width: 36px; height: 36px; font-size: 15px; }
+    .main { padding: 1.5rem 1rem 3rem; }
+    .step-sub { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <span class="badge">Sección 2.9</span>
+    <h1>Redes Regulatorias y Microambiente</h1>
+    <p>J. Alexander Garcia Zea: PhD en Biología Fundamental y de Sistemas. MSc en Genética y Evolución. Modelos continuos mecanísticos y separación de escalas temporales.</p>
+  </div>
+  <ul class="nav-list">
+    <li><a href="#s1" class="nav-link"><span class="nav-number">1</span> Problema Multi-escala</a></li>
+    <li><a href="#s2" class="nav-link"><span class="nav-number">2</span> Teoría QSSA</a></li>
+    <li><a href="#s3" class="nav-link"><span class="nav-number">3</span> Demo QSSA</a></li>
+    <li><a href="#s4" class="nav-link"><span class="nav-number">4</span> Briggs-Haldane</a></li>
+    <li><a href="#s5" class="nav-link"><span class="nav-number">5</span> Simulación BH</a></li>
+    <li><a href="#s6" class="nav-link"><span class="nav-number">6</span> PWA Biestable</a></li>
+    <li><a href="#s7" class="nav-link"><span class="nav-number">7</span> Histéresis PWA</a></li>
+    <li><a href="#s8" class="nav-link"><span class="nav-number">8</span> Sistema Híbrido</a></li>
+    <li><a href="#s9" class="nav-link"><span class="nav-number">9</span> Simulador Híbrido</a></li>
+    <li><a href="#s10" class="nav-link"><span class="nav-number">10</span> Puntos Focales</a></li>
+    <li><a href="#s11" class="nav-link"><span class="nav-number">11</span> 4 Escenarios</a></li>
+    <li><a href="#s12" class="nav-link"><span class="nav-number">12</span> Mapa de Fases</a></li>
+    <li><a href="#s13" class="nav-link"><span class="nav-number">13</span> Conclusiones</a></li>
+  </ul>
+</aside>
+
+<main class="main">
+
+  <section class="hero">
+    <h1>Redes Regulatorias y Microambiente</h1>
+    <p>Cómo dos cosas que cambian a velocidades muy distintas —el ambiente de un tejido y el estado de sus células— se pueden modelar juntas sin morir en el intento. Un recorrido guiado por la Sección 2.9, con gráficos interactivos y explicaciones en lenguaje sencillo.</p>
+  </section>
+
+  <!-- ========== SECTION 1 ========== -->
+  <section class="step" id="s1">
+    <div class="step-header">
+      <div class="step-badge">1</div>
+      <h2>El Problema: Dos Relojes que Corren a Velocidades Distintas</h2>
+    </div>
+    <p class="step-sub">Dos variables, dos escalas de tiempo, un mismo tejido</p>
+
+    <div class="card">
+      <h3>¿Qué estamos modelando?</h3>
+      <p>Imagina un tejido biológico donde conviven dos cosas:</p>
+      <ul>
+        <li>$S(t)$: una condición del <strong>microambiente</strong> que cambia <em>lento</em> (días a semanas). Por ejemplo, el nivel de oxígeno, la acidez o la concentración de una señal inflamatoria.</li>
+        <li>$X(t)$: el <strong>fenotipo celular</strong>, que cambia <em>rápido</em> (minutos a horas). Por ejemplo, si una célula está proliferando, durmiendo o secretando algo.</li>
+      </ul>
+      <p>Los dos se afectan mutuamente:</p>
+      <div class="math-box">
+        $$\dot{S} = F(S, X), \qquad \dot{X} = G(S, X)$$
+      </div>
+      <p>Es decir: <em>el ambiente cambia por culpa de las células, y las células cambian por culpa del ambiente</em>. Un círculo cerrado.</p>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples</span>
+      <p>Tienes dos cosas que se empujan una a la otra, pero una es lenta y otra es rápida. Si intentas simular las dos al mismo tiempo con el mismo paso de tiempo, la lenta necesitaría millones de pasos para avanzar un poquito, mientras la rápida ya habría terminado hace rato.</p>
+      <p><strong>Pregunta central:</strong> ¿cómo modelar este sistema sin morir de aburrimiento computacional?</p>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-head">🔍 Analogía: el termostato</span>
+      <p>Piensa en un termostato. La <strong>temperatura</strong> de una habitación cambia lentamente (minutos). El <strong>calentador</strong>, en cambio, se prende y apaga en cuestión de segundos. Si quisieras simular los dos con el mismo paso de tiempo necesitarías avanzar por milisegundos para ver cómo cambia la temperatura por horas.</p>
+      <p>Pero hay un atajo: como el calentador es tan rápido, <strong>siempre está en su estado de equilibrio</strong> (encendido o apagado según la temperatura actual). No necesitas resolver sus transitorios. Esa es exactamente la idea de QSSA.</p>
+    </div>
+
+    <div class="tip">
+      <span class="tip-head">Idea clave</span>
+      Cuando una variable es mucho más rápida que la otra, la podemos tratar como si <strong>siempre estuviera en equilibrio</strong> con respecto a la lenta. Eso es la <strong>Hipótesis de Cuasi-Estado-Estacionario (QSSA)</strong>.
+    </div>
+
+    <div class="diagram-wrap">
+      <img src="img2.png" alt="Diagrama de la red regulatoria y el microambiente">
+    </div>
+  </section>
+
+  <!-- ========== SECTION 2 ========== -->
+  <section class="step" id="s2">
+    <div class="step-header">
+      <div class="step-badge">2</div>
+      <h2>La Herramienta: Hipótesis de Cuasi-Estado-Estacionario (QSSA)</h2>
+    </div>
+    <p class="step-sub">Cómo "congelar" la parte rápida para simplificar la lenta</p>
+
+    <div class="card">
+      <h3>La idea matemática</h3>
+      <p>Supongamos que $X$ evoluciona en una escala de tiempo $t$ mucho más rápida que $S$ en su escala $\tau$, con $t \ll \tau$.</p>
+      <p>Entonces, desde el punto de vista de $S$, la variable $X$ ya "llegó a su destino". Eso significa:</p>
+      <div class="math-box">
+        $$\dot{X} = G(S, X) = 0 \quad\Longrightarrow\quad X_{\text{ss}}(S)$$
+      </div>
+      <p>Es decir, $X$ deja de ser una variable dinámica y se vuelve una <strong>fórmula algebraica</strong> de $S$. El sistema completo se reduce a una sola ecuación para $S$:</p>
+      <div class="math-box">
+        $$\boxed{\;\dot{S} = F\big(\tau,\, X_{\text{ss}}(S)\big)\;}$$
+      </div>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples</span>
+      <p>En lugar de resolver dos ecuaciones acopladas, resolvemos <strong>una sola</strong>. Cada vez que necesitamos saber cuánto vale $X$, lo calculamos con una fórmula que depende de $S$. Pasamos de un sistema "complicado" a uno "fácil", a cambio de un pequeño error que veremos enseguida.</p>
+    </div>
+
+    <div class="note">
+      <span class="note-head">Observación 2.36</span>
+      Como $F$ depende explícitamente de $X_{\text{ss}}(S)$, la dinámica del parámetro $S$ refleja la <strong>proporción de fenotipos</strong> presentes en el tejido. Es decir: si las células cambian de estado, el ambiente lo "siente".
+    </div>
+  </section>
+
+  <!-- ========== SECTION 3 ========== -->
+  <section class="step" id="s3">
+    <div class="step-header">
+      <div class="step-badge">3</div>
+      <h2>Veamos QSSA Funcionando en una Simulación</h2>
+    </div>
+    <p class="step-sub">Comprobación numérica con un sistema de dos escalas</p>
+
+    <div class="card">
+      <h3>El sistema de prueba</h3>
+      <p>Usamos un ejemplo simple para ver qué tan buena es la aproximación:</p>
+      <div class="math-box">
+        $$\varepsilon\,\frac{dX}{d\tau} = -X + S \qquad\text{(variable rápida)}$$
+        $$\frac{dS}{d\tau} = -0.5\,S + 0.1\,X \qquad\text{(variable lenta)}$$
+      </div>
+      <p>El parámetro $\varepsilon$ controla la separación de escalas. Cuando $\varepsilon \to 0$, la variable $X$ se vuelve casi instantánea y la curva real se pega a la curva QSSA ($X_{ss}(S) = S$).</p>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples</span>
+      <ul>
+        <li>$\varepsilon$ <strong>grande</strong> (por ejemplo 1.0): las dos variables van a la misma velocidad. QSSA <strong>no funciona</strong>.</li>
+        <li>$\varepsilon$ <strong>pequeño</strong> (por ejemplo 0.005): una variable va mucho más rápido que la otra. QSSA <strong>funciona perfecto</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$\varepsilon$ (separación de escalas)</label><span class="slider-value" id="s3-eps-val">0.05</span></div>
+        <input type="range" id="s3-eps" min="0.005" max="1" step="0.005" value="0.05">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$\tau_{max}$ (tiempo final)</label><span class="slider-value" id="s3-tmax-val">20</span></div>
+        <input type="range" id="s3-tmax" min="5" max="50" step="1" value="20">
+      </div>
+    </div>
+
+    <div class="plot-grid-2">
+      <div class="plot-container" id="plot-step3-left"></div>
+      <div class="plot-container" id="plot-step3-right"></div>
+    </div>
+
+    <div class="tip" style="margin-top:1rem;">
+      <span class="tip-head">Qué observar</span>
+      Mueve $\varepsilon$ desde 1.0 hacia 0.005. Mira cómo la <span style="color:#3b82f6; font-weight:700;">curva azul</span> (dinámica completa) se pega a la <span style="color:#f59e0b; font-weight:700;">curva naranja</span> (QSSA) cuando $\varepsilon$ se vuelve pequeño. Cuando $\varepsilon \approx 1$, las dos se separan mucho: QSSA deja de ser válida.
+    </div>
+  </section>
+
+  <!-- ========== SECTION 4 ========== -->
+  <section class="step" id="s4">
+    <div class="step-header">
+      <div class="step-badge">4</div>
+      <h2>El Ejemplo Clásico: Briggs-Haldane (Michaelis-Menten)</h2>
+    </div>
+    <p class="step-sub">Cómo una enzima convierte un sustrato en producto</p>
+
+    <div class="card">
+      <h3>La reacción bioquímica</h3>
+      <p>Una enzima $E$ se une a un sustrato $S$ para formar un complejo $ES$, que luego libera el producto $P$ y la enzima queda libre:</p>
+      <div class="math-box">
+        $$E + S \;\underset{k_r}{\overset{k_f}{\rightleftharpoons}}\; ES \;\overset{k_{cat}}{\longrightarrow}\; E + P$$
+      </div>
+      <p>Las ecuaciones completas (un sistema de <strong>4 dimensiones</strong>) son:</p>
+      <div class="math-box">
+        $$\begin{aligned}
+        \tfrac{d[E]}{dt} &= -k_f[E][S] + k_r[ES] + k_{cat}[ES] \\
+        \tfrac{d[S]}{dt} &= -k_f[E][S] + k_r[ES] \\
+        \tfrac{d[ES]}{dt} &= k_f[E][S] - k_r[ES] - k_{cat}[ES] \\
+        \tfrac{d[P]}{dt} &= k_{cat}[ES]
+        \end{aligned}$$
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-head">🔍 Analogía: la cadena de montaje</span>
+      <p>Imagina una fábrica con $E$ obreros (enzimas) y una banda transportadora llena de piezas $S$ (sustrato). Los obreros toman piezas ($ES$), las transforman, y sueltan el producto terminado $P$.</p>
+      <p>Como los obreros son rápidos comparados con la cantidad de piezas que va pasando, el número de obreros ocupados se ajusta instantáneamente. No hace falta modelar cada segundo lo que hace cada obrero.</p>
+    </div>
+
+    <div class="card">
+      <h3>La reducción mágica: de 4D a 1D</h3>
+      <p>Dos atajos poderosos:</p>
+      <ol>
+        <li><strong>Conservación de enzima:</strong> $[E] + [ES] = [E]_0$ (la enzima siempre está, ocupada o libre).</li>
+        <li><strong>QSSA sobre $[ES]$:</strong> como el complejo se forma y se rompe muy rápido, $d[ES]/dt = 0$.</li>
+      </ol>
+      <p>Definiendo la constante de Michaelis $K_M = (k_r + k_{cat})/k_f$, queda una <strong>sola ecuación</strong>:</p>
+      <div class="math-box">
+        $$\boxed{\;\frac{d[P]}{dt} = k_{cat}\frac{[E]_0[S]}{K_M + [S]}\;}$$
+      </div>
+      <p><strong>Resultado clave:</strong> pasamos de un sistema 4D a una sola EDO. ¡Sin perder lo esencial!</p>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples</span>
+      <p>El término $K_M$ es como un "umbral de hambre": cuando $[S] \ll K_M$, los obreros están casi todos libres y la velocidad es proporcional a la cantidad de piezas. Cuando $[S] \gg K_M$, todos los obreros están ocupados y la velocidad alcanza un <strong>máximo</strong> (saturación).</p>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 5 ========== -->
+  <section class="step" id="s5">
+    <div class="step-header">
+      <div class="step-badge">5</div>
+      <h2>¿Qué Tan Buena Es la Aproximación QSSA en Briggs-Haldane?</h2>
+    </div>
+    <p class="step-sub">Comparamos la solución exacta (4D) con la aproximada (1D)</p>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$k_f$ (velocidad de unión)</label><span class="slider-value" id="s5-kf-val">1.0</span></div>
+        <input type="range" id="s5-kf" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_r$ (velocidad de disociación)</label><span class="slider-value" id="s5-kr-val">0.5</span></div>
+        <input type="range" id="s5-kr" min="0.1" max="5" step="0.1" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{cat}$ (catálisis)</label><span class="slider-value" id="s5-kcat-val">0.5</span></div>
+        <input type="range" id="s5-kcat" min="0.1" max="5" step="0.1" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$[E]_0$ (concentración de enzima)</label><span class="slider-value" id="s5-E0-val">10</span></div>
+        <input type="range" id="s5-E0" min="1" max="50" step="1" value="10">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$[S]_0$ (concentración de sustrato)</label><span class="slider-value" id="s5-S0-val">100</span></div>
+        <input type="range" id="s5-S0" min="10" max="300" step="10" value="100">
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step5"></div>
+
+    <div class="simple" style="margin-top:1.25rem;">
+      <span class="simple-head">💡 En palabras simples</span>
+      <p>La aproximación QSSA funciona bien cuando se cumple la <strong>"condición de QSSA"</strong>: que haya <strong>mucha más pieza que obreros</strong>. Es decir, $[S]_0 \gg [E]_0$.</p>
+      <ul>
+        <li>Si hay muchos obreros y pocas piezas → QSSA falla, porque el complejo $ES$ ya no puede considerarse en equilibrio instantáneo.</li>
+        <li>Si hay pocos obreros y muchas piezas → QSSA funciona perfecto (que es lo típico en biología celular).</li>
+      </ul>
+    </div>
+
+    <div class="tip">
+      <span class="tip-head">Qué observar</span>
+      Con los valores por defecto, la <span style="color:#dc2626; font-weight:700;">curva roja</span> (exacta) y la <span style="color:#16324f; font-weight:700;">curva azul oscura</span> (QSSA) están casi pegadas. Sube $[E]_0$ hasta 50 o baja $[S]_0$ hasta 10 y verás cómo se separan.
+    </div>
+  </section>
+
+  <!-- ========== SECTION 6 ========== -->
+  <section class="step" id="s6">
+    <div class="step-header">
+      <div class="step-badge">6</div>
+      <h2>Cuando el Sistema Tiene "Memoria": Dinámica Biestable y PWA</h2>
+    </div>
+    <p class="step-sub">Interruptores biológicos que recuerdan de dónde vienen</p>
+
+    <div class="card">
+      <h3>Los dos estados del sistema</h3>
+      <p>Imagina que el fenotipo $E$ puede estar en dos estados (por ejemplo, célula "sana" o "activada"), y que el estímulo $S$ decide cuál:</p>
+      <ul>
+        <li>Si $S < S^-$: solo puede existir el estado <strong>bajo</strong> ($E_{low}$).</li>
+        <li>Si $S > S^+$: solo puede existir el estado <strong>alto</strong> ($E_{high}$).</li>
+        <li>Si $S$ está entre $S^-$ y $S^+$: <strong>los dos son posibles</strong>. ¿Cuál gana? Depende de <em>cómo llegaste</em>: hay <strong>memoria</strong>. A eso le llamamos <strong>histéresis</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-head">🔍 Analogía: el interruptor de la luz</span>
+      <p>Piensa en un interruptor de esos que <em>hacen clic</em>. Si lo pones en el punto medio, no se queda ahí: se va a un lado o al otro, según de dónde venga. Esa es la idea de la histéresis: hay dos posiciones estables, y el punto medio es inestable.</p>
+      <p>El sistema PWA (Piecewise-Affine, "afín a trozos") es una forma de escribir esa idea con <strong>cuatro reglas muy simples</strong>, sin resolver un modelo complicado.</p>
+    </div>
+
+    <div class="card">
+      <h3>La aproximación PWA</h3>
+      <p>En vez de resolver el sistema completo, describimos la respuesta con una función "afín a trozos" (Ec. 2.31 del texto):</p>
+      <div class="math-box">
+        $$E(\tau) = \begin{cases}
+        E_{low} & \text{si } S(\tau) < S^- \;\text{ o }\;\{S\in[S^-,S^+] \text{ y } E_{prev}=E_{low}\}\\
+        E_{high} & \text{si } S(\tau) > S^+ \;\text{ o }\;\{S\in[S^-,S^+] \text{ y } E_{prev}=E_{high}\}
+        \end{cases}$$
+      </div>
+      <p><strong>Idea clave:</strong> la memoria del sistema se guarda en el valor previo $E_{prev}$.</p>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples</span>
+      <ul>
+        <li><strong>No hace falta</strong> resolver un sistema de ecuaciones diferenciales complicado.</li>
+        <li>La respuesta biestable se reduce a <strong>4 reglas algebraicas sencillas</strong> + una variable discreta de memoria.</li>
+        <li>Esto es <em>mucho</em> más rápido de simular y captura lo esencial.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 7 ========== -->
+  <section class="step" id="s7">
+    <div class="step-header">
+      <div class="step-badge">7</div>
+      <h2>Dibujemos la Curva de Histéresis</h2>
+    </div>
+    <p class="step-sub">La "memoria" del sistema, en una sola imagen</p>
+
+    <div class="simple">
+      <span class="simple-head">💡 Cómo leer esta curva</span>
+      <ul>
+        <li>Si el estímulo $S$ <strong>va subiendo</strong> desde 0, seguimos la <span style="color:#dc2626; font-weight:700;">curva roja</span>.</li>
+        <li>Si el estímulo $S$ <strong>va bajando</strong> desde 2, seguimos la <span style="color:#3b82f6; font-weight:700;">curva azul</span>.</li>
+        <li>En la <strong>zona amarilla</strong> (entre $S^-$ y $S^+$) las dos trayectorias no coinciden: <em>el mismo valor de $S$ puede dar dos valores distintos de $E$</em>. Esa es la histéresis.</li>
+      </ul>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$S^-$ (umbral inferior)</label><span class="slider-value" id="s7-sminus-val">0.80</span></div>
+        <input type="range" id="s7-sminus" min="0.1" max="1.0" step="0.05" value="0.8">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$S^+$ (umbral superior)</label><span class="slider-value" id="s7-splus-val">1.20</span></div>
+        <input type="range" id="s7-splus" min="1.0" max="1.9" step="0.05" value="1.2">
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step7"></div>
+
+    <div class="tip">
+      <span class="tip-head">Qué observar</span>
+      <ul style="margin: 6px 0 0; padding-left: 1.25rem;">
+        <li>La <strong>zona amarilla</strong> es la región de histéresis. Cuanto más ancha, mayor la memoria del sistema.</li>
+        <li>Si intentas hacer $S^- = S^+$ verás que el rectángulo se cierra y se pierde la histéresis: el sistema se vuelve un simple interruptor sin memoria.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 8 ========== -->
+  <section class="step" id="s8">
+    <div class="step-header">
+      <div class="step-badge">8</div>
+      <h2>El Sistema Híbrido: Ahora las Dos Escalas se Hablan</h2>
+    </div>
+    <p class="step-sub">El fenotipo empuja al ambiente, y el ambiente empuja al fenotipo</p>
+
+    <div class="card">
+      <h3>El acoplamiento</h3>
+      <p>Ya tenemos por un lado la respuesta rápida $E(\tau)$ (PWA) y por otro el ambiente lento $S(\tau)$. Los conectamos: <strong>el estímulo lento depende del fenotipo</strong> actual:</p>
+      <div class="math-box">
+        $$\dot{S}(\tau) = \begin{cases}
+        F_{low}(S)  & \text{si } E(\tau) = E_{low} \\
+        F_{high}(S) & \text{si } E(\tau) = E_{high}
+        \end{cases}$$
+      </div>
+      <p>Usamos el modelo lineal más simple posible (didáctico):</p>
+      <div class="math-box">
+        $$F_{low}(S) = k(S_{ss}^{low} - S), \qquad F_{high}(S) = k(S_{ss}^{high} - S)$$
+      </div>
+      <p>Los valores $S_{ss}^{low}$ y $S_{ss}^{high}$ son los <strong>puntos focales</strong>: hacia dónde "querría ir" el ambiente si el fenotipo no cambiara.</p>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples</span>
+      <p>Imagina que el fenotipo es un auto y el ambiente es el destino. Si el fenotipo está en modo "low", el ambiente se dirige al punto focal $S_{ss}^{low}$. Si está en "high", se dirige a $S_{ss}^{high}$.</p>
+      <p>Pero el fenotipo a su vez <strong>cambia según el ambiente</strong>. Es decir: el auto decide su dirección según dónde esté, y dónde está depende de la dirección. Un verdadero acoplamiento.</p>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-head">🔍 Analogía: la calefacción y el termostato</span>
+      <p>Es como un termostato con dos puntos de consigna: uno bajo (calefacción casi apagada) y uno alto (calefacción a tope). La temperatura se mueve hacia uno u otro según qué modo esté activo, y el modo activo depende de la temperatura actual.</p>
+      <p>Este acoplamiento, según cómo se elijan los valores, da cuatro tipos de comportamiento: homeostasis, inflamación crónica, biestabilidad u oscilaciones. Los veremos enseguida.</p>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 9 ========== -->
+  <section class="step" id="s9">
+    <div class="step-header">
+      <div class="step-badge">9</div>
+      <h2>Juega con el Sistema Completo</h2>
+    </div>
+    <p class="step-sub">Mueve los deslizadores y observa hacia dónde va el sistema</p>
+
+    <div class="simple">
+      <span class="simple-head">💡 Antes de mover los deslizadores</span>
+      <ul>
+        <li><strong>Líneas gris punteadas</strong> ($S^- = 0.8$ y $S^+ = 1.2$): los umbrales de histéresis.</li>
+        <li><strong>Línea azul punteada</strong> ($S_{ss}^{low}$): destino del ambiente cuando el fenotipo es "low".</li>
+        <li><strong>Línea roja punteada</strong> ($S_{ss}^{high}$): destino cuando el fenotipo es "high".</li>
+        <li><strong>Línea verde continua</strong>: la trayectoria real de $S(\tau)$.</li>
+      </ul>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$S_{ss}^{low}$ (punto focal bajo)</label><span class="slider-value" id="s9-sl-val">0.50</span></div>
+        <input type="range" id="s9-sl" min="0.0" max="2.0" step="0.05" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$S_{ss}^{high}$ (punto focal alto)</label><span class="slider-value" id="s9-sh-val">1.50</span></div>
+        <input type="range" id="s9-sh" min="0.0" max="2.0" step="0.05" value="1.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$S_0$ (condición inicial)</label><span class="slider-value" id="s9-S0-val">0.50</span></div>
+        <input type="range" id="s9-S0" min="0.0" max="2.0" step="0.05" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_0$ (fenotipo inicial)</label><span class="slider-value" id="s9-E0-val">low</span></div>
+        <select id="s9-E0">
+          <option value="low" selected>low</option>
+          <option value="high">high</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step9"></div>
+
+    <div class="tip">
+      <span class="tip-head">Qué observar</span>
+      <p>Prueba poner $S_0$ en 0.5 y $E_0$ en "low". Verás que $S$ sube hacia $S_{ss}^{high}$ si cruza el umbral $S^+$, o se queda cerca de $S_{ss}^{low}$ si no lo cruza. La <strong>historia del sistema</strong> (de dónde vienes) determina el destino final.</p>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 10 ========== -->
+  <section class="step" id="s10">
+    <div class="step-header">
+      <div class="step-badge">10</div>
+      <h2>Cuatro Futuros Posibles: el Análisis de Puntos Focales</h2>
+    </div>
+    <p class="step-sub">Según dónde apunten los focos, el sistema se comporta distinto</p>
+
+    <div class="card">
+      <h3>La tabla clave</h3>
+      <p>La posición de los <strong>puntos focales</strong> $S_{ss}^{low}$ y $S_{ss}^{high}$ respecto a los umbrales $S^-$ y $S^+$ determina el comportamiento a largo plazo (Fig. 2.26 del texto):</p>
+      <div class="math-box" style="font-size:14.5px;">
+        <table style="width:100%; border-collapse:collapse;">
+          <tr style="border-bottom:1px solid #cbd5e1; background: #f8fafc;">
+            <th style="padding:10px; text-align:left;">#</th>
+            <th style="padding:10px; text-align:left;">Comportamiento</th>
+            <th style="padding:10px; text-align:left;">Condición</th>
+          </tr>
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <td style="padding:10px;"><strong>(i)</strong></td>
+            <td style="padding:10px;"><strong>Homeostasis</strong></td>
+            <td style="padding:10px;">$S_{ss}^{low} \le S^+$ y $S_{ss}^{high} < S^-$</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <td style="padding:10px;"><strong>(ii)</strong></td>
+            <td style="padding:10px;"><strong>Inflamación crónica</strong></td>
+            <td style="padding:10px;">$S_{ss}^{low} > S^+$ y $S_{ss}^{high} \ge S^-$</td>
+          </tr>
+          <tr style="border-bottom:1px solid #e5e7eb;">
+            <td style="padding:10px;"><strong>(iii)</strong></td>
+            <td style="padding:10px;"><strong>Biestabilidad</strong></td>
+            <td style="padding:10px;">$S_{ss}^{low} \le S^+$ pero $S_{ss}^{high} \ge S^-$</td>
+          </tr>
+          <tr>
+            <td style="padding:10px;"><strong>(iv)</strong></td>
+            <td style="padding:10px;"><strong>Oscilaciones</strong></td>
+            <td style="padding:10px;">$S_{ss}^{low} > S^+$ y $S_{ss}^{high} < S^-$</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples, ¿qué significa cada caso?</span>
+      <ul>
+        <li><strong>(i) Homeostasis:</strong> el sistema siempre termina en el estado bajo. Es estable y vuelve solo. Es el caso "sano".</li>
+        <li><strong>(ii) Inflamación crónica:</strong> el sistema siempre termina en el estado alto. Se quedó "pegado" en un modo patológico.</li>
+        <li><strong>(iii) Biestabilidad:</strong> los dos finales son posibles. Depende de la historia. Es lo más peligroso: una vez que entras en el estado malo, ya no sales.</li>
+        <li><strong>(iv) Oscilaciones:</strong> el sistema no se queda en ningún lado: rebota entre los dos estados, como un ciclo infinito.</li>
+      </ul>
+    </div>
+
+    <div class="tip">
+      <span class="tip-head">Idea biológica</span>
+      Pequeños cambios en los puntos focales pueden <strong>conmutar</strong> el sistema entre fenotipos sanos y patológicos. Esa es la relevancia clínica de todo este análisis.
+    </div>
+  </section>
+
+  <!-- ========== SECTION 11 ========== -->
+  <section class="step" id="s11">
+    <div class="step-header">
+      <div class="step-badge">11</div>
+      <h2>Cada Escenario, una Historia Clínica</h2>
+    </div>
+    <p class="step-sub">Elige un escenario y experimenta con él</p>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>Escenario</label></div>
+        <select id="s11-scenario">
+          <option value="(i) Homeostasis">(i) Homeostasis — el sistema vuelve solo al equilibrio</option>
+          <option value="(ii) Inflamación crónica">(ii) Inflamación crónica — se queda pegado en el estado alto</option>
+          <option value="(iii) Biestabilidad" selected>(iii) Biestabilidad — dos futuros posibles según la historia</option>
+          <option value="(iv) Oscilaciones">(iv) Oscilaciones — rebota sin parar entre estados</option>
+        </select>
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$S_0$ (condición inicial)</label><span class="slider-value" id="s11-S0-val">0.50</span></div>
+        <input type="range" id="s11-S0" min="0.0" max="2.0" step="0.05" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_0$ (fenotipo inicial)</label><span class="slider-value" id="s11-E0-val">low</span></div>
+        <select id="s11-E0">
+          <option value="low" selected>low</option>
+          <option value="high">high</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step11"></div>
+
+    <div class="tip">
+      <span class="tip-head">Qué probar</span>
+      <ul style="margin: 6px 0 0; padding-left: 1.25rem;">
+        <li>En <strong>(iii) Biestabilidad</strong>: empieza con $E_0$ = low y luego con $E_0$ = high, con el mismo $S_0$. Verás que el destino final <strong>cambia</strong>. Esa es la memoria del sistema.</li>
+        <li>En <strong>(iv) Oscilaciones</strong>: observa cómo el sistema nunca se queda quieto, va y viene.</li>
+        <li>En <strong>(i) vs (ii)</strong>: el sistema siempre termina en el mismo estado, sin importar dónde empieces. El único cambio es <em>cuál</em> estado.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 12 ========== -->
+  <section class="step" id="s12">
+    <div class="step-header">
+      <div class="step-badge">12</div>
+      <h2>Un Mapa para Navegar el Espacio de Parámetros</h2>
+    </div>
+    <p class="step-sub">Los cuatro comportamientos, dibujados en un solo plano</p>
+
+    <div class="card">
+      <h3>¿Cómo leer este mapa?</h3>
+      <p>Barremos el plano $(S_{ss}^{low},\ S_{ss}^{high})$ y coloreamos cada punto según qué comportamiento produce. Las líneas gris punteadas marcan los umbrales $S^- = 0.8$ y $S^+ = 1.2$.</p>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 En palabras simples</span>
+      <ul>
+        <li><strong>Región azul</strong> (abajo-izquierda): homeostasis — todo vuelve al estado bajo.</li>
+        <li><strong>Región roja</strong> (abajo-derecha): inflamación crónica — todo se queda en el estado alto.</li>
+        <li><strong>Región amarilla</strong> (arriba-izquierda): biestabilidad — dos futuros posibles.</li>
+        <li><strong>Región verde</strong> (arriba-derecha): oscilaciones — el sistema nunca se estabiliza.</li>
+      </ul>
+      <p>Mover los puntos focales es como mover una ficha en este mapa: cambiar de región significa cambiar radicalmente el destino del sistema.</p>
+    </div>
+
+    <div class="plot-container" id="plot-step12"></div>
+
+    <div class="tip">
+      <span class="tip-head">Idea clave</span>
+      Este mapa es una <strong>herramienta de diagnóstico</strong>: si medimos $S_{ss}^{low}$ y $S_{ss}^{high}$ en un paciente, podemos predecir si su tejido va a homeostasis, inflamación, biestabilidad u oscilaciones. En el mundo real esos puntos se estiman con experimentos y ajuste de datos.
+    </div>
+  </section>
+
+  <!-- ========== SECTION 13 ========== -->
+  <section class="step" id="s13">
+    <div class="step-header">
+      <div class="step-badge">13</div>
+      <h2>Conclusiones y Observaciones Finales</h2>
+    </div>
+    <p class="step-sub">Lo que nos llevamos del recorrido</p>
+
+    <div class="card">
+      <h3>Síntesis en cinco puntos</h3>
+      <ol style="padding-left:1.5rem;">
+        <li><strong>QSSA</strong> permite colapsar sistemas multi-escala en modelos algebraicos de baja dimensión. Es la herramienta matemática que conecta lo <em>rápido</em> (biología molecular) con lo <em>lento</em> (fisiología tisular).</li>
+        <li><strong>Briggs-Haldane</strong> es el ejemplo canónico: un sistema 4D se reduce a <strong>una sola EDO</strong> sin pérdida cualitativa importante.</li>
+        <li>La <strong>aproximación PWA</strong> evita resolver diagramas de bifurcación completos. Codifica la respuesta biestable con 4 reglas algebraicas simples y una memoria discreta.</li>
+        <li>El <strong>análisis de puntos focales</strong> revela que la posición de $S_{ss}^{low}$ y $S_{ss}^{high}$ frente a $S^-$ y $S^+$ determina cuatro comportamientos clínicamente relevantes.</li>
+        <li><strong>Relevancia clínica:</strong> enfermedades degenerativas crónicas frecuentemente emergen de <strong>aberraciones en la interacción fenotipo-microambiente</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="simple">
+      <span class="simple-head">💡 El mensaje central, en una frase</span>
+      <p>Cuando dos cosas se afectan mutuamente pero a velocidades muy distintas, no hace falta simular todo con lujo de detalle. Basta con <strong>poner la parte rápida en equilibrio</strong> y quedarse con la lenta. Y para la parte rápida, si tiene memoria (histéresis), se puede reemplazar por <strong>reglas simples</strong>. Este atajo es lo que permite estudiar sistemas tan complejos como un tejido real.</p>
+    </div>
+
+    <div class="card">
+      <h3>Sugerencias para seguir explorando</h3>
+      <ul>
+        <li>Modifica los deslizadores de las secciones 9 y 11 para cruzar los umbrales y ver cómo cambia el comportamiento cualitativo.</li>
+        <li>Intenta implementar $F_{low}$ y $F_{high}$ no lineales (por ejemplo, una función de Hill) y verifica si las cuatro clases cualitativas se preservan.</li>
+        <li>¿Qué pasa si los umbrales $S^-$ y $S^+$ son iguales? (Se pierde la histéresis y el sistema se vuelve un interruptor puro, sin memoria).</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============================================================
+   MOTOR DE SIMULACIÓN — Runge-Kutta 4to orden
+   ============================================================ */
+const Solver = {
+  rk4(f, y0, t0, t1, dt) {
+    const n = Math.ceil((t1 - t0) / dt);
+    const t = new Array(n + 1);
+    const y = y0.map(() => new Array(n + 1));
+    t[0] = t0;
+    y0.forEach((v, j) => y[j][0] = v);
+    for (let i = 0; i < n; i++) {
+      const ti = t[i];
+      const yi = y.map(arr => arr[i]);
+      const k1 = f(ti, yi);
+      const k2 = f(ti + dt/2, yi.map((v, j) => v + dt/2 * k1[j]));
+      const k3 = f(ti + dt/2, yi.map((v, j) => v + dt/2 * k2[j]));
+      const k4 = f(ti + dt, yi.map((v, j) => v + dt * k3[j]));
+      y.forEach((arr, j) => {
+        arr[i + 1] = yi[j] + dt/6 * (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]);
+      });
+      t[i + 1] = ti + dt;
+    }
+    return { t, y };
+  }
+};
+
+/* ============================================================
+   ESTILO PLOTLY
+   ============================================================ */
+const PLOT_STYLE = {
+  font: { family: 'Inter, sans-serif', size: 13, color: '#1f2937' },
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: '#fafbfc',
+  margin: { l: 60, r: 30, t: 45, b: 50 },
+  xaxis: { gridcolor: '#e5e7eb', zerolinecolor: '#cbd5e1', linecolor: '#cbd5e1' },
+  yaxis: { gridcolor: '#e5e7eb', zerolinecolor: '#cbd5e1', linecolor: '#cbd5e1' },
+  legend: { orientation: 'h', x: 0, y: -0.22, bgcolor: 'rgba(255,255,255,0)', font: { size: 11 } },
+  showlegend: true
+};
+const PLOT_CONFIG = { responsive: true, displayModeBar: false, displaylogo: false };
+
+function plot(id, traces, layout) {
+  const el = document.getElementById(id);
+  if (!el) { console.warn('Plot div not found:', id); return; }
+  try {
+    const finalLayout = Object.assign({}, PLOT_STYLE, layout);
+    if (layout.xaxis) finalLayout.xaxis = Object.assign({}, PLOT_STYLE.xaxis, layout.xaxis);
+    if (layout.yaxis) finalLayout.yaxis = Object.assign({}, PLOT_STYLE.yaxis, layout.yaxis);
+    Plotly.react(el, traces, finalLayout, PLOT_CONFIG);
+  } catch (err) {
+    console.error('Plotly error en', id, err);
+  }
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+function sv(id) {
+  const el = document.getElementById(id);
+  if (!el) return NaN;
+  const v = parseFloat(el.value);
+  return isNaN(v) ? 0 : v;
+}
+function updateLabel(id, val, decimals = 2) {
+  const el = document.getElementById(id + '-val');
+  if (el) {
+    if (typeof val === 'number' && isFinite(val)) el.textContent = val.toFixed(decimals);
+    else el.textContent = val;
+  }
+}
+function bind(id, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', handler);
+}
+function bindChange(id, handler) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', handler);
+    el.addEventListener('change', handler);
+  }
+}
+
+/* ============================================================
+   PASO 3 — Demo QSSA
+   ============================================================ */
+function updateStep3() {
+  const eps = sv('s3-eps');
+  const tmax = sv('s3-tmax');
+  updateLabel('s3-eps', eps, 3);
+  updateLabel('s3-tmax', tmax, 0);
+
+  const dt = Math.max(1e-4, Math.min(0.01, eps / 5));
+
+  const f = (t, y) => {
+    const X = y[0], S = y[1];
+    return [(-X + S) / eps, -0.5 * S + 0.1 * X];
+  };
+  const sol = Solver.rk4(f, [0.0, 1.0], 0, tmax, dt);
+  const tau = sol.t;
+  const X = sol.y[0];
+  const S = sol.y[1];
+  const Xqssa = S.slice();
+
+  plot('plot-step3-left', [
+    { x: tau, y: X,     name: 'X(τ) completa', line: { color: '#3b82f6', width: 2.5 } },
+    { x: tau, y: Xqssa, name: 'X_ss(S) = S (QSSA)', line: { color: '#f59e0b', width: 2, dash: 'dash' } }
+  ], {
+    title: { text: 'Fenotipo X  (ε = ' + eps.toFixed(3) + ')', font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'τ (escala lenta)' },
+    yaxis: { title: 'X' },
+    showlegend: true,
+    height: 400
+  });
+
+  plot('plot-step3-right', [
+    { x: tau, y: S, name: 'S(τ) microambiente', line: { color: '#22a06b', width: 2.5 } }
+  ], {
+    title: { text: 'Microambiente S', font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'τ (escala lenta)' },
+    yaxis: { title: 'S' },
+    showlegend: false,
+    height: 400
+  });
+}
+
+/* ============================================================
+   PASO 5 — Briggs-Haldane
+   ============================================================ */
+function updateStep5() {
+  const kf = sv('s5-kf'), kr = sv('s5-kr'), kcat = sv('s5-kcat');
+  const E0 = sv('s5-E0'), S0 = sv('s5-S0');
+  updateLabel('s5-kf', kf, 1); updateLabel('s5-kr', kr, 1);
+  updateLabel('s5-kcat', kcat, 1); updateLabel('s5-E0', E0, 0);
+  updateLabel('s5-S0', S0, 0);
+
+  const tmax = 20;
+  const fFull = (t, y) => {
+    const E = y[0], S = y[1], ES = y[2], P = y[3];
+    return [
+      -kf*E*S + kr*ES + kcat*ES,
+      -kf*E*S + kr*ES,
+       kf*E*S - kr*ES - kcat*ES,
+       kcat*ES
+    ];
+  };
+  const solFull = Solver.rk4(fFull, [E0, S0, 0.0, 0.0], 0, tmax, 0.02);
+  const tFull = solFull.t;
+  const S = solFull.y[1], ES = solFull.y[2], P = solFull.y[3];
+
+  const KM = (kr + kcat) / kf;
+  const fQssa = (t, P) => {
+    const Sq = Math.max(S0 - P[0], 1e-9);
+    return [kcat * E0 * Sq / (KM + Sq)];
+  };
+  const solQssa = Solver.rk4(fQssa, [0.0], 0, tmax, 0.02);
+  const Pq = solQssa.y[0];
+
+  plot('plot-step5', [
+    { x: tFull, y: P,     name: 'P — completa (4D)', line: { color: '#dc2626', width: 2.5 } },
+    { x: solQssa.t, y: Pq, name: 'P — QSSA (1D)',     line: { color: '#16324f', width: 2, dash: 'dash' } },
+    { x: tFull, y: S,     name: 'S',                 line: { color: '#3b82f6', width: 1.5 }, yaxis: 'y2' },
+    { x: tFull, y: ES,    name: 'ES',                line: { color: '#22a06b', width: 1.5 }, yaxis: 'y2' }
+  ], {
+    title: { text: 'Briggs-Haldane — Reducción QSSA vs solución exacta', font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 't' },
+    yaxis: { title: '[P]' },
+    yaxis2: { title: '[S], [ES]', overlaying: 'y', side: 'right', showgrid: false, color: '#6b7280' },
+    height: 450
+  });
+}
+
+/* ============================================================
+   PASO 7 — PWA histéresis
+   ============================================================ */
+function pwaResponse(S_vals, S_minus, S_plus, E_low, E_high, E_init) {
+  let E_prev = E_init === 'low' ? E_low : E_high;
+  const E_vals = [];
+  for (let k = 0; k < S_vals.length; k++) {
+    const S = S_vals[k];
+    if (S < S_minus) E_prev = E_low;
+    else if (S > S_plus) E_prev = E_high;
+    E_vals.push(E_prev);
+  }
+  return E_vals;
+}
+
+function updateStep7() {
+  let S_minus = sv('s7-sminus');
+  let S_plus  = sv('s7-splus');
+  if (S_plus <= S_minus) S_plus = S_minus + 0.05;
+  updateLabel('s7-sminus', S_minus, 2);
+  updateLabel('s7-splus', S_plus, 2);
+
+  const N = 300;
+  const S_up = [];
+  for (let i = 0; i < N; i++) S_up.push(i / (N - 1) * 2);
+  const S_down = S_up.slice().reverse();
+
+  const E_up   = pwaResponse(S_up,   S_minus, S_plus, 0, 1, 'low');
+  const E_down = pwaResponse(S_down, S_minus, S_plus, 0, 1, 'high');
+
+  const shapes = [];
+  if (S_plus > S_minus) {
+    shapes.push({
+      type: 'rect',
+      xref: 'x', yref: 'y',
+      x0: S_minus, x1: S_plus,
+      y0: -0.1, y1: 1.15,
+      fillcolor: 'rgba(254, 243, 199, 0.55)',
+      line: { width: 0 },
+      layer: 'below'
+    });
+  }
+  shapes.push({
+    type: 'line', xref: 'x', yref: 'y',
+    x0: S_minus, x1: S_minus, y0: -0.1, y1: 1.15,
+    line: { color: 'gray', dash: 'dot', width: 1.5 }
+  });
+  shapes.push({
+    type: 'line', xref: 'x', yref: 'y',
+    x0: S_plus, x1: S_plus, y0: -0.1, y1: 1.15,
+    line: { color: 'gray', dash: 'dot', width: 1.5 }
+  });
+
+  plot('plot-step7', [
+    { x: S_up,   y: E_up,   name: 'S creciente (desde estado bajo)',  line: { color: '#dc2626', width: 3 } },
+    { x: S_down, y: E_down, name: 'S decreciente (desde estado alto)', line: { color: '#3b82f6', width: 3 } }
+  ], {
+    title: { text: 'Respuesta PWA biestable — Histéresis', font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'S (estímulo)', range: [0, 2] },
+    yaxis: { title: 'E (efector)', range: [-0.1, 1.15] },
+    shapes: shapes,
+    annotations: [
+      { x: S_minus, y: 1.08, text: 'S⁻', showarrow: false, font: { color: '#6b7280', size: 14 } },
+      { x: S_plus,  y: 1.08, text: 'S⁺', showarrow: false, font: { color: '#6b7280', size: 14 } }
+    ],
+    height: 430
+  });
+}
+
+/* ============================================================
+   Simulador híbrido compartido
+   ============================================================ */
+function simulateHybrid(S_ss_low, S_ss_high, S_minus, S_plus, E_low, E_high, k, S0, E0, tau_max, dtau) {
+  const n = Math.ceil(tau_max / dtau);
+  const tau = new Array(n + 1);
+  const S_arr = new Array(n + 1);
+  const E_arr = new Array(n + 1);
+
+  let S = S0;
+  let E_prev = E0 === 'low' ? E_low : E_high;
+
+  tau[0] = 0;
+  S_arr[0] = S;
+  E_arr[0] = E_prev;
+
+  for (let i = 0; i < n; i++) {
+    if (S < S_minus) E_prev = E_low;
+    else if (S > S_plus) E_prev = E_high;
+
+    const dS = (E_prev === E_low) ? k * (S_ss_low - S) : k * (S_ss_high - S);
+    S = S + dS * dtau;
+
+    tau[i + 1] = tau[i] + dtau;
+    S_arr[i + 1] = S;
+    E_arr[i + 1] = E_prev;
+  }
+
+  return { tau, S: S_arr, E: E_arr };
+}
+
+/* ============================================================
+   PASO 9 — Simulador híbrido libre
+   ============================================================ */
+function updateStep9() {
+  const S_ss_low = sv('s9-sl');
+  const S_ss_high = sv('s9-sh');
+  const S0 = sv('s9-S0');
+  const E0 = document.getElementById('s9-E0').value;
+
+  updateLabel('s9-sl', S_ss_low, 2);
+  updateLabel('s9-sh', S_ss_high, 2);
+  updateLabel('s9-S0', S0, 2);
+  updateLabel('s9-E0', E0);
+
+  const S_MINUS = 0.8, S_PLUS = 1.2, TMAX = 80;
+  const sim = simulateHybrid(S_ss_low, S_ss_high, S_MINUS, S_PLUS, 0, 1, 0.5, S0, E0, TMAX, 0.01);
+
+  const shapes = [
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: S_MINUS,  y1: S_MINUS,  line: { color: 'gray', dash: 'dot', width: 1.5 } },
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: S_PLUS,   y1: S_PLUS,   line: { color: 'gray', dash: 'dot', width: 1.5 } },
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: S_ss_low, y1: S_ss_low, line: { color: '#3b82f6', dash: 'dash', width: 1.5 } },
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: S_ss_high, y1: S_ss_high, line: { color: '#dc2626', dash: 'dash', width: 1.5 } }
+  ];
+
+  plot('plot-step9', [
+    { x: sim.tau, y: sim.S, name: 'S(τ)', line: { color: '#22a06b', width: 2.5 } },
+    { x: sim.tau, y: sim.E, name: 'E(τ) [0–1]', line: { color: '#16324f', width: 2.5 }, yaxis: 'y2' }
+  ], {
+    title: { text: 'Sistema híbrido PWA + dinámica lenta', font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'τ (tiempo lento)', range: [0, TMAX] },
+    yaxis: { title: 'S', range: [-0.05, 2.05] },
+    yaxis2: { title: 'E', overlaying: 'y', side: 'right', range: [-0.1, 1.1], showgrid: false, color: '#16324f' },
+    shapes: shapes,
+    height: 450
+  });
+}
+
+/* ============================================================
+   PASO 11 — Escenarios predefinidos
+   ============================================================ */
+const SCENARIOS = {
+  '(i) Homeostasis':          { S_ss_low: 0.5, S_ss_high: 0.3 },
+  '(ii) Inflamación crónica': { S_ss_low: 1.5, S_ss_high: 1.0 },
+  '(iii) Biestabilidad':      { S_ss_low: 0.5, S_ss_high: 1.0 },
+  '(iv) Oscilaciones':        { S_ss_low: 1.5, S_ss_high: 0.3 }
+};
+
+function updateStep11() {
+  const esc = document.getElementById('s11-scenario').value;
+  const S0 = sv('s11-S0');
+  const E0 = document.getElementById('s11-E0').value;
+  updateLabel('s11-S0', S0, 2);
+  updateLabel('s11-E0', E0);
+
+  const p = SCENARIOS[esc];
+  const S_MINUS = 0.8, S_PLUS = 1.2, TMAX = 80;
+  const sim = simulateHybrid(p.S_ss_low, p.S_ss_high, S_MINUS, S_PLUS, 0, 1, 0.5, S0, E0, TMAX, 0.01);
+
+  const shapes = [
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: S_MINUS, y1: S_MINUS, line: { color: 'gray', dash: 'dot', width: 1.5 } },
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: S_PLUS,  y1: S_PLUS,  line: { color: 'gray', dash: 'dot', width: 1.5 } },
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: p.S_ss_low,  y1: p.S_ss_low,  line: { color: '#3b82f6', dash: 'dash', width: 1.5 } },
+    { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: TMAX, y0: p.S_ss_high, y1: p.S_ss_high, line: { color: '#dc2626', dash: 'dash', width: 1.5 } }
+  ];
+
+  plot('plot-step11', [
+    { x: sim.tau, y: sim.S, name: 'S(τ)', line: { color: '#22a06b', width: 2.5 } },
+    { x: sim.tau, y: sim.E, name: 'E(τ)', line: { color: '#16324f', width: 2.5 }, yaxis: 'y2' }
+  ], {
+    title: { text: 'Escenario: ' + esc, font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'τ (tiempo lento)', range: [0, TMAX] },
+    yaxis: { title: 'S', range: [-0.05, 2.05] },
+    yaxis2: { title: 'E', overlaying: 'y', side: 'right', range: [-0.1, 1.1], showgrid: false, color: '#16324f' },
+    shapes: shapes,
+    height: 450
+  });
+}
+
+/* ============================================================
+   PASO 12 — Mapa de comportamientos
+   ============================================================ */
+function updateStep12() {
+  const S_MINUS = 0.8, S_PLUS = 1.2;
+  const N = 150;
+  const grid = [];
+  for (let i = 0; i < N; i++) grid.push(i / (N - 1) * 2);
+
+  const Z = [];
+  for (let i = 0; i < N; i++) {
+    const row = [];
+    const Sh = grid[i];
+    for (let j = 0; j < N; j++) {
+      const Sl = grid[j];
+      let val;
+      if (Sl <= S_PLUS && Sh < S_MINUS) val = 1;
+      else if (Sl > S_PLUS && Sh >= S_MINUS) val = 2;
+      else if (Sl <= S_PLUS && Sh >= S_MINUS) val = 3;
+      else val = 4;
+      row.push(val);
+    }
+    Z.push(row);
+  }
+
+  plot('plot-step12', [{
+    type: 'heatmap',
+    z: Z,
+    x: grid,
+    y: grid,
+    colorscale: [
+      [0.00, '#dbeafe'], [0.249, '#dbeafe'],
+      [0.25, '#fecaca'], [0.499, '#fecaca'],
+      [0.50, '#fef3c7'], [0.749, '#fef3c7'],
+      [0.75, '#d1fae5'], [1.00, '#d1fae5']
+    ],
+    zmin: 1, zmax: 4,
+    showscale: false,
+    hovertemplate: 'S_ss^low = %{x:.2f}<br>S_ss^high = %{y:.2f}<extra></extra>'
+  }], {
+    title: { text: 'Mapa de comportamientos cualitativos del sistema híbrido', font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'S_ss^low', range: [0, 2] },
+    yaxis: { title: 'S_ss^high', range: [0, 2] },
+    showlegend: false,
+    shapes: [
+      { type: 'line', xref: 'x', yref: 'y', x0: S_MINUS, x1: S_MINUS, y0: 0, y1: 2, line: { color: 'gray', dash: 'dot', width: 1.5 } },
+      { type: 'line', xref: 'x', yref: 'y', x0: S_PLUS,  x1: S_PLUS,  y0: 0, y1: 2, line: { color: 'gray', dash: 'dot', width: 1.5 } },
+      { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: 2, y0: S_MINUS, y1: S_MINUS, line: { color: 'gray', dash: 'dot', width: 1.5 } },
+      { type: 'line', xref: 'x', yref: 'y', x0: 0, x1: 2, y0: S_PLUS,  y1: S_PLUS,  line: { color: 'gray', dash: 'dot', width: 1.5 } }
+    ],
+    annotations: [
+      { x: 0.4, y: 0.4, text: '(i) Homeostasis',             showarrow: false, font: { size: 12, color: '#1e40af' } },
+      { x: 1.6, y: 0.4, text: '(ii) Inflamación<br>crónica', showarrow: false, font: { size: 12, color: '#991b1b' } },
+      { x: 0.4, y: 1.6, text: '(iii) Biestabilidad',         showarrow: false, font: { size: 12, color: '#92400e' } },
+      { x: 1.6, y: 1.6, text: '(iv) Oscilaciones',           showarrow: false, font: { size: 12, color: '#065f46' } }
+    ],
+    height: 560
+  });
+}
+
+/* ============================================================
+   BINDINGS
+   ============================================================ */
+bind('s3-eps', updateStep3);
+bind('s3-tmax', updateStep3);
+
+['kf','kr','kcat','E0','S0'].forEach(function(k){ bind('s5-' + k, updateStep5); });
+
+bind('s7-sminus', updateStep7);
+bind('s7-splus',  updateStep7);
+
+bind('s9-sl', updateStep9);
+bind('s9-sh', updateStep9);
+bind('s9-S0', updateStep9);
+bindChange('s9-E0', updateStep9);
+
+bind('s11-scenario', updateStep11);
+bind('s11-S0', updateStep11);
+bindChange('s11-E0', updateStep11);
+
+/* ============================================================
+   SCROLL SPY
+   ============================================================ */
+const sections = document.querySelectorAll('.step');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(function(link) {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+sections.forEach(function(s){ observer.observe(s); });
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+function initializeAll() {
+  if (typeof Plotly === 'undefined') {
+    console.warn('Plotly aún no cargado, reintentando...');
+    setTimeout(initializeAll, 100);
+    return;
+  }
+  try { updateStep3();  } catch(e) { console.error('Step3:', e); }
+  try { updateStep5();  } catch(e) { console.error('Step5:', e); }
+  try { updateStep7();  } catch(e) { console.error('Step7:', e); }
+  try { updateStep9();  } catch(e) { console.error('Step9:', e); }
+  try { updateStep11(); } catch(e) { console.error('Step11:', e); }
+  try { updateStep12(); } catch(e) { console.error('Step12:', e); }
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initializeAll);
+} else {
+  initializeAll();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo Lotka–Volterra · Tutorial para estudiantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --bg: #ffffff;
+    --text: #1f2937;
+    --text-strong: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+    --accent: #1e3a8a;
+    --accent-soft: #eff4fb;
+    --green: #15803d;
+    --green-soft: #ecfdf5;
+    --red: #b91c1c;
+    --red-soft: #fef2f2;
+    --amber: #b45309;
+    --amber-soft: #fffbeb;
+    --code-bg: #f8fafc;
+  }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.8;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Header */
+  header.top {
+    padding: 44px 32px 30px;
+    border-bottom: 1px solid var(--border);
+    background: #ffffff;
+  }
+  header.top .head-inner { max-width: 1080px; margin: 0 auto; }
+  header.top h1 {
+    margin: 0 0 10px;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-strong);
+  }
+  header.top p.sub { margin: 0; color: var(--muted); font-size: 15.5px; max-width: 780px; }
+  header.top .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  /* Nav */
+  nav.toc {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 24px;
+    overflow-x: auto; white-space: nowrap;
+    scrollbar-width: none;
+  }
+  nav.toc::-webkit-scrollbar { display: none; }
+  nav.toc .nav-inner { max-width: 1080px; margin: 0 auto; }
+  nav.toc a {
+    display: inline-block;
+    padding: 6px 12px; margin-right: 2px;
+    font-size: 13px; font-weight: 500;
+    color: var(--muted); text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+  }
+  nav.toc a:hover { background: #f3f4f6; color: var(--text-strong); }
+  nav.toc a.active { background: var(--accent-soft); color: var(--accent); }
+  /* Main */
+  main { max-width: 1080px; margin: 0 auto; padding: 40px 32px 80px; }
+  section { margin-bottom: 72px; scroll-margin-top: 72px; }
+  section h2 {
+    font-size: 23px; font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-strong);
+    margin: 0 0 8px;
+  }
+  section .step-sub {
+    font-size: 14.5px;
+    color: var(--muted);
+    margin: 0 0 22px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+  }
+  section h3 {
+    font-size: 16.5px; font-weight: 600;
+    color: var(--text-strong);
+    margin: 26px 0 10px;
+  }
+  section p { margin: 0 0 14px; }
+  section ul, section ol { margin: 0 0 14px; padding-left: 22px; }
+  section li { margin-bottom: 8px; }
+  code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px; background: var(--code-bg);
+    padding: 2px 6px; border-radius: 4px; color: #334155;
+  }
+  .lead { font-size: 16.5px; color: #374151; margin-bottom: 20px; }
+  /* Cards */
+  .card {
+    border: 1px solid var(--border);
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin: 18px 0 22px;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+  }
+  .card.tight { padding: 16px 20px; }
+  .card-title {
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 12px;
+  }
+  /* Widgets */
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px 22px; margin-bottom: 16px;
+  }
+  .controls.narrow { grid-template-columns: 1fr; max-width: 360px; }
+  .ctl { display: flex; flex-direction: column; gap: 4px; }
+  .ctl label {
+    font-size: 12.5px; font-weight: 600;
+    color: var(--text-strong);
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .ctl .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 500;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 1px 8px; border-radius: 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 4px;
+    background: #e5e7eb; border-radius: 2px;
+    outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px;
+    background: var(--accent); border-radius: 50%;
+    cursor: pointer; border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(30,58,138,0.4);
+    transition: transform 0.12s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    background: var(--accent); border-radius: 50%;
+    cursor: pointer; border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(30,58,138,0.4);
+  }
+  select {
+    width: 100%; padding: 7px 10px;
+    font-family: inherit; font-size: 13.5px;
+    color: var(--text-strong);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px; background: #fff;
+    cursor: pointer; outline: none;
+  }
+  select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  button.btn {
+    font-family: inherit; font-size: 13.5px; font-weight: 600;
+    padding: 10px 20px; color: #fff;
+    background: var(--accent); border: none;
+    border-radius: 6px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  button.btn:hover { background: #152a63; }
+  button.btn:disabled { background: #9ca3af; cursor: wait; }
+  /* Plots */
+  .plot { width: 100%; min-height: 340px; }
+  .plot-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 800px) { .plot-row { grid-template-columns: 1fr; } }
+  /* Network SVG */
+  .net-wrap { width: 100%; overflow-x: auto; }
+  #network-svg { display: block; width: 100%; min-width: 640px; height: auto; background: #fff; }
+  #network-svg .node { fill: #f3f4f6; stroke: #111827; stroke-width: 1.5; }
+  #network-svg .node-label { font: 600 15px 'Inter', sans-serif; fill: #111827; }
+  #network-svg .node-caption { font: 500 11px 'Inter', sans-serif; fill: #6b7280; }
+  #network-svg .empty-label { font: 500 18px 'Inter', sans-serif; fill: #6b7280; }
+  #network-svg .edge { fill: none; stroke: #111827; stroke-width: 1.6; }
+  #network-svg .edge-mod { fill: none; stroke: #9ca3af; stroke-width: 1.2; stroke-dasharray: 5 4; }
+  #network-svg .edge-label { font: 600 12px 'JetBrains Mono', monospace; fill: #111827; }
+  #network-svg .edge-label-mod { font: 500 11px 'Inter', sans-serif; fill: #9ca3af; }
+  #network-svg g.rx { transition: opacity 0.2s; }
+  #network-svg g.rx.highlight .edge { stroke: #ea580c; stroke-width: 3; }
+  #network-svg g.rx.highlight .edge-label { fill: #ea580c; }
+  #network-svg g.rx.dim { opacity: 0.25; }
+  /* Tables */
+  table.data {
+    width: 100%; border-collapse: collapse;
+    font-size: 13.5px; margin: 12px 0;
+  }
+  table.data th {
+    text-align: left; font-weight: 600;
+    color: var(--text-strong);
+    padding: 9px 12px;
+    border-bottom: 2px solid var(--border-strong);
+    background: #fafbfc; font-size: 12.5px;
+  }
+  table.data td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    color: #374151;
+    vertical-align: middle;
+  }
+  table.data td.mono { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+  table.data td:first-child { font-weight: 500; color: var(--text-strong); }
+  /* Callouts */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 14px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 18px 0;
+    font-size: 15px;
+    color: #1f2937;
+  }
+  .callout.green { border-color: var(--green); background: var(--green-soft); }
+  .callout.red { border-color: var(--red); background: var(--red-soft); }
+  .callout.amber { border-color: var(--amber); background: var(--amber-soft); }
+  .callout strong { color: var(--text-strong); }
+  .callout .ico {
+    font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; font-size: 11.5px;
+    display: block; margin-bottom: 4px;
+    color: var(--accent);
+  }
+  .callout.green .ico { color: var(--green); }
+  .callout.red .ico { color: var(--red); }
+  .callout.amber .ico { color: var(--amber); }
+  /* Result badge */
+  .result {
+    display: inline-block; padding: 2px 9px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; font-weight: 500;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .result.green { background: var(--green-soft); color: var(--green); }
+  .result.red { background: var(--red-soft); color: var(--red); }
+  /* KaTeX */
+  .katex { font-size: 1.03em; }
+  .katex-display { margin: 16px 0; }
+  .katex-display > .katex { font-size: 1.06em; }
+  /* Footer */
+  footer.end {
+    border-top: 1px solid var(--border);
+    padding: 28px 32px; text-align: center;
+    color: var(--muted); font-size: 13px;
+    background: #fafbfc;
+  }
+  .info-line {
+    font-size: 13.5px; color: #374151;
+    padding: 10px 14px;
+    background: #fafbfc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 12px 0;
+  }
+  .info-line b { color: var(--text-strong); font-weight: 600; }
+  /* "En palabras simples" box */
+  .simple {
+    background: #f7f9fc;
+    border: 1px solid #dbe4f0;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 18px 0;
+  }
+  .simple .head {
+    font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #1e40af; margin: 0 0 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .simple p { margin: 0 0 8px; font-size: 15px; color: #1f2937; }
+  .simple p:last-child { margin-bottom: 0; }
+  .simple ul { margin: 6px 0 0; padding-left: 20px; }
+  .simple ul li { font-size: 15px; }
+  /* Analogy box */
+  .analogy {
+    background: #fdf9ee;
+    border: 1px solid #f0e0be;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 18px 0;
+  }
+  .analogy .head {
+    font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: #92400e; margin: 0 0 8px;
+  }
+  .analogy p { margin: 0 0 8px; font-size: 15px; }
+  .analogy p:last-child { margin: 0; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="head-inner">
+    <span class="tag">Tutorial interactivo</span>
+    <h1>Modelo Lotka–Volterra</h1>
+    <p class="sub">J. Alexander Garcia Zea: PhD en Biologia Fundamental y de Sistemas. MSc en Genetica y Evolucion.</p>
+    <p class="sub">Cómo dos poblaciones —presas y depredadores— pueden convivir oscilando para siempre. Ocho pasos guiados, con gráficos que puedes manipular.</p>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="nav-inner">
+    <a href="#intro">Introducción</a>
+    <a href="#step1">1 · Red de reacciones</a>
+    <a href="#step2">2 · Ecuaciones</a>
+    <a href="#step3">3 · Conservación</a>
+    <a href="#step4">4 · Datos y problema</a>
+    <a href="#step5">5 · Puntos de equilibrio</a>
+    <a href="#step6">6 · Simulación</a>
+    <a href="#step7">7 · Ajuste de parámetros</a>
+    <a href="#step8">8 · Robustez</a>
+    <a href="#sintesis">Síntesis</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ======================= INTRO ======================= -->
+<section id="intro">
+  <h2>Introducción</h2>
+  <p class="step-sub">Dos poblaciones, una historia</p>
+  <p class="lead">
+    Imagina una isla con conejos (presas) y zorros (depredadores). Los conejos se reproducen solos;
+    los zorros necesitan encontrarse con un conejo para comer y reproducirse. Este tutorial explora
+    cómo se comporta ese sistema con <b>matemáticas sencillas</b> y con gráficos que puedes tocar.
+  </p>
+      <div class="diagram-wrap">
+      <img src="ima5.png" alt="Diagrama de red de reacciones" style="display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px;">
+    </div>
+    <div class="diagram-wrap">
+      <img src="ima4.png" alt="Diagrama de red de reacciones" style="display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px;">
+    </div>
+  <div class="simple">
+    <p class="head">💡 En palabras simples</p>
+    <p>
+      Vamos a estudiar dos poblaciones que cambian con el tiempo:
+      <span class="math-inline">x(t)</span> es cuántas presas hay, <span class="math-inline">y(t)</span> es cuántos depredadores.
+      Queremos entender cómo evolucionan cuando interactúan entre ellas.
+    </p>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Modelo que vamos a estudiar</p>
+    <p style="margin:0 0 8px;">Dos ecuaciones diferenciales acopladas:</p>
+    <p class="mathblock">$$\dot x=\alpha x-\beta xy,\qquad \dot y=\gamma xy-\delta y$$</p>
+    <p style="margin:12px 0 0; font-size:14px; color:var(--muted);">
+      Cada letra griega es un parámetro con un significado concreto. Los iremos presentando paso a paso.
+      Valores por defecto: <span class="math-inline">\alpha=1.1</span>, <span class="math-inline">\beta=0.4</span>,
+      <span class="math-inline">\gamma=0.10</span>, <span class="math-inline">\delta=0.40</span>.
+    </p>
+  </div>
+
+  <div class="callout">
+    <span class="ico">Cómo usar este tutorial</span>
+    Avanza paso a paso. En cada sección hay <b>gráficos y deslizadores</b> que puedes mover
+    para ver qué pasa. Al final de cada paso, el recuadro azul te dice <b>qué conclusión sacar</b>.
+  </div>
+</section>
+
+<!-- ======================= STEP 1 ======================= -->
+<section id="step1">
+  <h2>Paso 1 · ¿Quién interactúa con quién?</h2>
+  <p class="step-sub">La red de reacciones: un mapa visual del sistema</p>
+
+  <p>
+    Antes de escribir ecuaciones, hagamos un <b>mapa</b>. En el sistema pasan cuatro "cosas" (las llamamos
+    <b>reacciones</b>) y cada una aporta un término a las ecuaciones:
+  </p>
+
+  <table class="data">
+    <thead>
+      <tr><th>Reacción</th><th>Qué pasa</th><th>Velocidad</th><th>Efecto</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>R1</td>
+        <td class="mono">Las presas nacen solas</td>
+        <td class="mono"><span class="math-inline">v_1=\alpha x</span></td>
+        <td>Aumentan las presas</td>
+      </tr>
+      <tr>
+        <td>R2</td>
+        <td class="mono">Un depredador mata una presa</td>
+        <td class="mono"><span class="math-inline">v_2=\beta x y</span></td>
+        <td>Disminuyen las presas</td>
+      </tr>
+      <tr>
+        <td>R3</td>
+        <td class="mono">Un depredador come y se reproduce</td>
+        <td class="mono"><span class="math-inline">v_3=\gamma x y</span></td>
+        <td>Aumentan los depredadores</td>
+      </tr>
+      <tr>
+        <td>R4</td>
+        <td class="mono">Los depredadores mueren solos</td>
+        <td class="mono"><span class="math-inline">v_4=\delta y</span></td>
+        <td>Disminuyen los depredadores</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="analogy">
+    <p class="head">🔍 Analogía</p>
+    <p>
+      Las reacciones R2 y R3 necesitan que un depredador y una presa <b>se encuentren</b>.
+      Por eso su velocidad es proporcional al producto <span class="math-inline">x\cdot y</span>:
+      si hay muchas presas y muchos depredadores, habrá muchos encuentros.
+      En cambio R1 y R4 solo dependen de una población (nacimientos o muertes naturales).
+    </p>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Diagrama de la red</p>
+    <p style="font-size:14px; color:var(--muted); margin-top:0;">
+      Elige una reacción y mira qué flechas del diagrama se iluminan.
+      Las flechas punteadas grises son <b>modificadores</b>: participan pero no se consumen.
+    </p>
+    <div class="controls narrow">
+      <div class="ctl">
+        <label for="rx-select">Resaltar reacción <span class="val" id="rx-label">—</span></label>
+        <select id="rx-select">
+          <option value="none">Ninguna</option>
+          <option value="R1">R1 · Nacimiento de presas</option>
+          <option value="R2">R2 · Muerte de presas por depredación</option>
+          <option value="R3">R3 · Reproducción de depredadores</option>
+          <option value="R4">R4 · Muerte natural de depredadores</option>
+        </select>
+      </div>
+    </div>
+    <div class="net-wrap">
+      <svg id="network-svg" viewBox="0 0 1080 520" xmlns="http://www.w3.org/2000/svg" aria-label="Red de reacciones">
+        <defs>
+          <marker id="mk-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#111827"/>
+          </marker>
+          <marker id="mk-arrow-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/>
+          </marker>
+        </defs>
+        <text x="80" y="258" text-anchor="middle" class="empty-label">∅</text>
+        <text x="980" y="258" text-anchor="middle" class="empty-label">∅</text>
+        <text x="980" y="408" text-anchor="middle" class="empty-label">∅</text>
+        <circle cx="400" cy="250" r="42" class="node"/>
+        <text x="400" y="256" text-anchor="middle" class="node-label">P</text>
+        <text x="400" y="315" text-anchor="middle" class="node-caption">PRESAS (x)</text>
+        <circle cx="700" cy="400" r="42" class="node"/>
+        <text x="700" y="406" text-anchor="middle" class="node-label">D</text>
+        <text x="700" y="462" text-anchor="middle" class="node-caption">DEPREDADORES (y)</text>
+        <g class="rx" data-rx="R1">
+          <line x1="130" y1="250" x2="352" y2="250" class="edge" marker-end="url(#mk-arrow)"/>
+          <text x="240" y="238" text-anchor="middle" class="edge-label">v₁ = αx</text>
+        </g>
+        <g class="rx" data-rx="R2">
+          <line x1="448" y1="250" x2="940" y2="250" class="edge" marker-end="url(#mk-arrow)"/>
+          <text x="700" y="238" text-anchor="middle" class="edge-label">v₂ = βxy</text>
+          <path d="M 700 358 C 660 320, 640 280, 640 258" class="edge-mod" marker-end="url(#mk-arrow-gray)"/>
+          <text x="612" y="330" text-anchor="middle" class="edge-label-mod">D</text>
+        </g>
+        <g class="rx" data-rx="R3">
+          <path d="M 745 395 C 810 380, 810 440, 745 425" class="edge" marker-end="url(#mk-arrow)"/>
+          <text x="790" y="485" text-anchor="middle" class="edge-label">v₃ = γxy</text>
+          <path d="M 440 268 C 540 320, 620 380, 668 405" class="edge-mod" marker-end="url(#mk-arrow-gray)"/>
+          <text x="540" y="352" text-anchor="middle" class="edge-label-mod">P</text>
+        </g>
+        <g class="rx" data-rx="R4">
+          <line x1="748" y1="400" x2="940" y2="400" class="edge" marker-end="url(#mk-arrow)"/>
+          <text x="845" y="388" text-anchor="middle" class="edge-label">v₄ = δy</text>
+        </g>
+        <text x="20" y="500" font-size="11" fill="#9ca3af">flechas punteadas grises = modificador (participa pero no se consume)</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="ico">Idea clave</span>
+    Cada reacción genera un término en las ecuaciones. En el Paso 2 veremos exactamente cómo.
+  </div>
+</section>
+
+<!-- ======================= STEP 2 ======================= -->
+<section id="step2">
+  <h2>Paso 2 · Las ecuaciones, término por término</h2>
+  <p class="step-sub">De las reacciones a las matemáticas</p>
+
+  <p>
+    Ahora sumamos los aportes de cada reacción. La presa gana con R1 y pierde con R2; el depredador
+    gana con R3 y pierde con R4:
+  </p>
+
+  <p class="mathblock">$$\frac{dx}{dt}=\underbrace{\alpha x}_{R_1}-\underbrace{\beta x y}_{R_2},\qquad \frac{dy}{dt}=\underbrace{\gamma x y}_{R_3}-\underbrace{\delta y}_{R_4}$$</p>
+
+  <h3>¿Qué significa cada parámetro?</h3>
+  <ul>
+    <li><b><span class="math-inline">\alpha</span></b> · tasa de nacimiento de presas (sin depredadores).</li>
+    <li><b><span class="math-inline">\beta</span></b> · qué tan eficiente es el depredador cazando presas.</li>
+    <li><b><span class="math-inline">\gamma</span></b> · cuánta energía de presas se convierte en nuevos depredadores.</li>
+    <li><b><span class="math-inline">\delta</span></b> · tasa de muerte natural de depredadores.</li>
+  </ul>
+
+  <div class="simple">
+    <p class="head">💡 En palabras simples</p>
+    <ul>
+      <li><b>Términos lineales</b> (<span class="math-inline">\alpha x</span>, <span class="math-inline">\delta y</span>): solo dependen de una población.</li>
+      <li><b>Términos no lineales</b> (<span class="math-inline">\beta xy</span>, <span class="math-inline">\gamma xy</span>): dependen del <b>encuentro</b> entre las dos.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Juega con las poblaciones y mira los términos</p>
+    <p style="font-size:14px; color:var(--muted); margin-top:0;">
+      Mueve <span class="math-inline">x</span> e <span class="math-inline">y</span> y observa cómo cambian las "contribuciones".
+    </p>
+    <div class="controls">
+      <div class="ctl">
+        <label for="x-slider-2">x (presas) <span class="val" id="x-val-2">8.0</span></label>
+        <input type="range" id="x-slider-2" min="0" max="15" step="0.1" value="8">
+      </div>
+      <div class="ctl">
+        <label for="y-slider-2">y (depredadores) <span class="val" id="y-val-2">3.0</span></label>
+        <input type="range" id="y-slider-2" min="0" max="10" step="0.1" value="3">
+      </div>
+    </div>
+    <div class="plot-row">
+      <div id="plot-terms" class="plot"></div>
+      <div id="plot-balance" class="plot"></div>
+    </div>
+  </div>
+
+  <div class="callout green">
+    <span class="ico">Qué observar</span>
+    <ul style="margin:6px 0 0;">
+      <li>Con <span class="math-inline">y=0</span> (sin depredadores) la presa crece libremente: <span class="math-inline">\dot x=\alpha x</span>.</li>
+      <li>Con <span class="math-inline">x=0</span> (sin presas) el depredador decae: <span class="math-inline">\dot y=-\delta y</span>.</li>
+      <li>Los términos con <span class="math-inline">xy</span> son pequeños si cualquiera de las dos poblaciones es chica.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= STEP 3 ======================= -->
+<section id="step3">
+  <h2>Paso 3 · ¿Hay algo que se conserve?</h2>
+  <p class="step-sub">La cantidad oculta que nunca cambia</p>
+
+  <p>
+    En física, cuando algo se conserva podemos simplificar muchísimo el problema. Aquí <b>no</b> se
+    conserva la suma <span class="math-inline">x+y</span> (el sistema crea y destruye individuos). Pero existe otra cantidad
+    que <b>sí</b> se conserva, aunque es más complicada:
+  </p>
+
+  <p class="mathblock">$$V(x,y)=\gamma x-\delta\ln x+\beta y-\alpha\ln y$$</p>
+
+  <p>Y cumple que <span class="math-inline">\dfrac{dV}{dt}=0</span> en toda trayectoria. Lo podemos verificar con álgebra simbólica:</p>
+
+  <div class="card tight">
+    <p class="card-title">Verificación simbólica</p>
+    <p style="margin:0;">
+      <span class="math-inline">\dfrac{dV}{dt}=0</span> &nbsp;⇒&nbsp; <b style="color:var(--green);"><span class="math-inline">V</span> es constante</b> sobre cada órbita.
+    </p>
+  </div>
+
+  <div class="analogy">
+    <p class="head">🔍 Analogía</p>
+    <p>
+      Piensa en una montaña con curvas de nivel. Si caminas siempre a la misma altura,
+      tu trayectoria está contenida en una de esas curvas. Aquí <span class="math-inline">V</span> hace las veces de
+      "altura": cada órbita vive en una curva de nivel.
+    </p>
+  </div>
+
+  <h3>¿Por qué esto nos ayuda?</h3>
+  <ol>
+    <li>Las órbitas son <b>curvas cerradas</b> que nunca se cruzan → el sistema oscila para siempre.</li>
+    <li>Podemos reducir los 4 parámetros a <b>uno solo</b> (<span class="math-inline">\lambda=\delta/\alpha</span>) cambiando de variables.</li>
+  </ol>
+
+  <div class="card">
+    <p class="card-title">Verifica la conservación con tus propios ojos</p>
+    <div class="controls">
+      <div class="ctl">
+        <label for="x0-slider-3">x₀ <span class="val" id="x0-val-3">6.0</span></label>
+        <input type="range" id="x0-slider-3" min="1" max="10" step="0.1" value="6">
+      </div>
+      <div class="ctl">
+        <label for="y0-slider-3">y₀ <span class="val" id="y0-val-3">2.0</span></label>
+        <input type="range" id="y0-slider-3" min="0.5" max="6" step="0.1" value="2">
+      </div>
+    </div>
+    <div class="plot-row">
+      <div id="plot-conserv" class="plot"></div>
+      <div id="plot-drift" class="plot"></div>
+    </div>
+    <p class="info-line" id="info-drift-3">—</p>
+  </div>
+
+  <div class="callout green">
+    <span class="ico">Qué observar</span>
+    La trayectoria azul se pega a la curva verde: es la misma curva de nivel de <span class="math-inline">V</span>.
+    El gráfico de la derecha muestra que <span class="math-inline">V</span> prácticamente no cambia — lo que vemos es solo
+    error numérico del ordenador, no física.
+  </div>
+</section>
+
+<!-- ======================= STEP 4 ======================= -->
+<section id="step4">
+  <h2>Paso 4 · Los datos y el problema a resolver</h2>
+  <p class="step-sub">Fabricamos "datos de laboratorio" y planteamos la meta</p>
+
+  <p>
+    Para practicar cómo se ajusta un modelo a datos reales, <b>fabricamos</b> unos datos sintéticos:
+    simulamos el modelo con parámetros conocidos ("la verdad") y luego <b>añadimos ruido</b>
+    como si vinieran de un experimento con errores de medición.
+  </p>
+
+  <div class="simple">
+    <p class="head">💡 En palabras simples</p>
+    <ul>
+      <li><b>"La verdad"</b>: los parámetros reales <span class="math-inline">(\alpha,\beta,\gamma,\delta) = (1.1, 0.4, 0.1, 0.4)</span>.</li>
+      <li><b>Condiciones iniciales</b>: <span class="math-inline">(x_0, y_0) = (6, 2)</span>.</li>
+      <li><b>Ruido</b>: multiplicamos cada medición por un número aleatorio alrededor de 1 con 5% de desviación.</li>
+    </ul>
+  </div>
+
+  <h3>¿Qué debería reproducir el modelo?</h3>
+  <ol>
+    <li><b>Oscilaciones que no se apagan</b> (amplitud constante).</li>
+    <li><b>El depredador va un cuarto de ciclo detrás de la presa</b> (primero sube la presa, luego el depredador).</li>
+    <li><b>Los promedios</b> de cada población coinciden con el punto fijo teórico.</li>
+  </ol>
+
+  <div class="card">
+    <p class="card-title">Datos sintéticos</p>
+    <p class="info-line" id="info-data-4">—</p>
+    <div id="plot-data" class="plot"></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Prueba con condiciones iniciales distintas</p>
+    <p style="font-size:14px; color:var(--muted); margin-top:0;">
+      Mueve los deslizadores y ve cómo la curva del modelo se aleja o se acerca a los datos.
+    </p>
+    <div class="controls">
+      <div class="ctl">
+        <label for="x0-slider-4">x₀ candidato <span class="val" id="x0-val-4">6.0</span></label>
+        <input type="range" id="x0-slider-4" min="1" max="10" step="0.1" value="6">
+      </div>
+      <div class="ctl">
+        <label for="y0-slider-4">y₀ candidato <span class="val" id="y0-val-4">2.0</span></label>
+        <input type="range" id="y0-slider-4" min="0.5" max="6" step="0.1" value="2">
+      </div>
+    </div>
+    <div id="plot-data-fit" class="plot"></div>
+  </div>
+
+  <div class="callout amber">
+    <span class="ico">Ojo con esto</span>
+    Aunque los parámetros sean correctos, si empiezas con otras condiciones iniciales la curva
+    <b>no pasa por los datos</b>: cada órbita es una curva distinta. Esto es clave para entender por
+    qué también hay que ajustar <span class="math-inline">(x_0, y_0)</span>.
+  </div>
+</section>
+
+<!-- ======================= STEP 5 ======================= -->
+<section id="step5">
+  <h2>Paso 5 · Puntos de equilibrio y su estabilidad</h2>
+  <p class="step-sub">¿Dónde se "queda quieto" el sistema?</p>
+
+  <p>
+    Un <b>punto de equilibrio</b> (o punto fijo) es un estado en el que nada cambia:
+    <span class="math-inline">\dot x=0</span> y <span class="math-inline">\dot y=0</span>. Resolviendo, aparecen dos:
+  </p>
+
+  <p class="mathblock">$$(x^*,y^*)=(0,0)\quad\text{(extinción)},\qquad (x^*,y^*)=\left(\frac{\delta}{\gamma},\ \frac{\alpha}{\beta}\right)\quad\text{(coexistencia)}$$</p>
+
+  <div class="simple">
+    <p class="head">💡 Qué significa cada uno</p>
+    <ul>
+      <li><b>(0,0)</b> · sin presas ni depredadores. Es <b>inestable</b> (una "silla"): cualquier presa que aparezca se multiplica.</li>
+      <li><b>Coexistencia</b> · ambas poblaciones viven. Es un <b>centro</b>: las poblaciones oscilan alrededor sin irse nunca.</li>
+    </ul>
+  </div>
+
+  <p>El <b>Jacobiano</b> (una matriz de derivadas) nos dice qué tipo de equilibrio es. Su forma general es:</p>
+  <p class="mathblock">$$J(x,y)=\begin{pmatrix}\alpha-\beta y & -\beta x\\ \gamma y & \gamma x-\delta\end{pmatrix}$$</p>
+
+  <p>En el punto de coexistencia sus autovalores son puramente imaginarios:</p>
+  <p class="mathblock">$$\lambda_{1,2}=\pm i\sqrt{\alpha\delta}$$</p>
+
+  <div class="card tight">
+    <p class="card-title">Consecuencia</p>
+    <p style="margin:0;">
+      El periodo de las oscilaciones cerca del equilibrio es
+      <span class="math-inline">T_{lin}=2\pi/\sqrt{\alpha\delta}</span>. A mayor producto <span class="math-inline">\alpha\delta</span>, más rápidas las oscilaciones.
+    </p>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Explora cómo cambian el equilibrio y las oscilaciones</p>
+    <div class="controls">
+      <div class="ctl">
+        <label for="a-slider-5">α (nacimiento de presas) <span class="val" id="a-val-5">1.10</span></label>
+        <input type="range" id="a-slider-5" min="0.1" max="3" step="0.05" value="1.1">
+      </div>
+      <div class="ctl">
+        <label for="b-slider-5">β (eficiencia del depredador) <span class="val" id="b-val-5">0.40</span></label>
+        <input type="range" id="b-slider-5" min="0.05" max="1.5" step="0.05" value="0.4">
+      </div>
+      <div class="ctl">
+        <label for="g-slider-5">γ (conversión a depredadores) <span class="val" id="g-val-5">0.10</span></label>
+        <input type="range" id="g-slider-5" min="0.01" max="0.5" step="0.01" value="0.1">
+      </div>
+      <div class="ctl">
+        <label for="d-slider-5">δ (muerte de depredadores) <span class="val" id="d-val-5">0.40</span></label>
+        <input type="range" id="d-slider-5" min="0.05" max="1.5" step="0.05" value="0.4">
+      </div>
+    </div>
+    <div class="plot-row">
+      <div id="plot-steady-ts" class="plot"></div>
+      <div id="plot-steady-phase" class="plot"></div>
+    </div>
+    <p class="info-line" id="info-steady-5">—</p>
+  </div>
+
+  <div class="callout green">
+    <span class="ico">Qué observar</span>
+    <ul style="margin:6px 0 0;">
+      <li><span class="math-inline">x^*</span> solo cambia con <span class="math-inline">\delta</span> y <span class="math-inline">\gamma</span>.</li>
+      <li><span class="math-inline">y^*</span> solo cambia con <span class="math-inline">\alpha</span> y <span class="math-inline">\beta</span>.</li>
+      <li>Subir <span class="math-inline">\alpha</span> o <span class="math-inline">\delta</span> hace las oscilaciones más rápidas.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= STEP 6 ======================= -->
+<section id="step6">
+  <h2>Paso 6 · Simulación numérica</h2>
+  <p class="step-sub">Dejemos que la computadora resuelva las ecuaciones</p>
+
+  <p>
+    Como las ecuaciones no tienen solución exacta sencilla, las resolvemos <b>paso a paso</b> con un
+    método numérico (Runge–Kutta de orden 4). La idea: avanzar en el tiempo dividiendo el intervalo
+    en trozos muy pequeños.
+  </p>
+
+  <div class="simple">
+    <p class="head">💡 Detalle técnico importante</p>
+    Este sistema <b>no tiene fricción</b>: si el método numérico es malo, las órbitas se van
+    "abriendo" o "cerrando" aunque no deberían. Con RK4 y pasos finos, la deriva de <span class="math-inline">V</span>
+    queda muy pequeña.
+  </div>
+
+  <div class="card">
+    <p class="card-title">Explorador dinámico</p>
+    <p style="font-size:14px; color:var(--muted); margin-top:0;">
+      Ajusta parámetros, condiciones iniciales y horizonte temporal.
+    </p>
+    <div class="controls">
+      <div class="ctl">
+        <label for="a-slider-6">α <span class="val" id="a-val-6">1.10</span></label>
+        <input type="range" id="a-slider-6" min="0.1" max="3" step="0.05" value="1.1">
+      </div>
+      <div class="ctl">
+        <label for="b-slider-6">β <span class="val" id="b-val-6">0.40</span></label>
+        <input type="range" id="b-slider-6" min="0.05" max="1.5" step="0.05" value="0.4">
+      </div>
+      <div class="ctl">
+        <label for="g-slider-6">γ <span class="val" id="g-val-6">0.10</span></label>
+        <input type="range" id="g-slider-6" min="0.01" max="0.5" step="0.01" value="0.1">
+      </div>
+      <div class="ctl">
+        <label for="d-slider-6">δ <span class="val" id="d-val-6">0.40</span></label>
+        <input type="range" id="d-slider-6" min="0.05" max="1.5" step="0.05" value="0.4">
+      </div>
+      <div class="ctl">
+        <label for="x0-slider-6">x₀ <span class="val" id="x0-val-6">6.0</span></label>
+        <input type="range" id="x0-slider-6" min="0.5" max="12" step="0.1" value="6">
+      </div>
+      <div class="ctl">
+        <label for="y0-slider-6">y₀ <span class="val" id="y0-val-6">2.0</span></label>
+        <input type="range" id="y0-slider-6" min="0.5" max="8" step="0.1" value="2">
+      </div>
+      <div class="ctl">
+        <label for="t-slider-6">t final <span class="val" id="t-val-6">60</span></label>
+        <input type="range" id="t-slider-6" min="10" max="150" step="5" value="60">
+      </div>
+    </div>
+    <div class="plot-row">
+      <div id="plot-dyn-ts" class="plot"></div>
+      <div id="plot-dyn-phase" class="plot"></div>
+    </div>
+    <p class="info-line" id="info-dyn-6">—</p>
+  </div>
+
+  <div class="callout green">
+    <span class="ico">Qué observar</span>
+    <ul style="margin:6px 0 0;">
+      <li>Las oscilaciones <b>nunca se apagan</b>: eso predice el modelo y lo confirma la simulación.</li>
+      <li>La <b>amplitud</b> depende de dónde empieces, pero el <b>periodo</b> es casi el mismo.</li>
+      <li>La <b>forma</b> de la órbita: picos rápidos de presa seguidos de descensos suaves.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= STEP 7 ======================= -->
+<section id="step7">
+  <h2>Paso 7 · Ajustar los parámetros a los datos</h2>
+  <p class="step-sub">El corazón del trabajo científico: encontrar los parámetros que mejor explican lo observado</p>
+
+  <p>
+    Queremos encontrar los parámetros <span class="math-inline">\theta=(\alpha,\beta,\gamma,\delta)</span> que hacen que el
+    modelo <b>se parezca lo más posible</b> a los datos. Medimos el "parecido" con una función de costo:
+  </p>
+
+  <p class="mathblock">$$S(\theta)=\sum_k \left(x_{mod}(t_k;\theta)-x_{datos}(t_k)\right)^2 + \left(y_{mod}(t_k;\theta)-y_{datos}(t_k)\right)^2$$</p>
+
+  <div class="simple">
+    <p class="head">💡 En palabras simples</p>
+    <ul>
+      <li><span class="math-inline">S</span> mide "qué tan lejos" está el modelo de los datos: mientras más chico, mejor.</li>
+      <li>Minimizar <span class="math-inline">S</span> es <b>buscar el mejor ajuste</b>.</li>
+      <li>Usamos un algoritmo llamado <b>Levenberg–Marquardt</b>. Como es fácil caer en "valles falsos", probamos 6 puntos de partida distintos (<b>multi-arranque</b>).</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Parte A · El "paisaje" del costo</p>
+    <p style="font-size:14px; color:var(--muted); margin-top:0;">
+      Estos gráficos muestran cuánto cambia <span class="math-inline">S</span> cuando movemos un parámetro a la vez.
+      La línea punteada negra marca el valor verdadero.
+    </p>
+    <div class="controls">
+      <div class="ctl">
+        <label for="a-slider-7">α <span class="val" id="a-val-7">1.10</span></label>
+        <input type="range" id="a-slider-7" min="0.2" max="2.5" step="0.02" value="1.1">
+      </div>
+      <div class="ctl">
+        <label for="d-slider-7">δ <span class="val" id="d-val-7">0.40</span></label>
+        <input type="range" id="d-slider-7" min="0.1" max="1.0" step="0.01" value="0.4">
+      </div>
+    </div>
+    <div class="plot-row">
+      <div id="plot-slice-alpha" class="plot"></div>
+      <div id="plot-slice-delta" class="plot"></div>
+    </div>
+    <p class="info-line" id="info-slice-7">—</p>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Parte B · Ejecuta el ajuste completo</p>
+    <p style="font-size:14px; color:var(--muted); margin-top:0;">
+      Haz clic en el botón. El algoritmo probará 6 puntos de partida distintos y te mostrará el mejor.
+    </p>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <button class="btn" id="fit-btn">Ejecutar ajuste</button>
+      <span id="fit-status" style="font-size:13.5px; color:var(--muted);">Listo.</span>
+    </div>
+    <div id="fit-results" style="margin-top:16px;"></div>
+    <div id="plot-fit-best" class="plot" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="callout green">
+    <span class="ico">Qué observar</span>
+    <ul style="margin:6px 0 0;">
+      <li>El mejor ajuste debe recuperar los parámetros verdaderos <b>con errores del orden del ruido</b> (≈5%).</li>
+      <li>La función <span class="math-inline">S</span> puede tener <b>varios mínimos locales</b> (óptimos falsos) por "aliasing de periodos": un modelo que se desfasa un ciclo entero también "parece" ajustar bien.</li>
+      <li>Por eso el multi-arranque es necesario: no basta un único intento.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= STEP 8 ======================= -->
+<section id="step8">
+  <h2>Paso 8 · ¿Qué tan sensible es el modelo?</h2>
+  <p class="step-sub">Robustez: cómo cambia el comportamiento cuando tocamos los parámetros</p>
+
+  <p>
+    Una última pregunta importante: si nos equivocamos un poco en un parámetro, ¿cambia mucho el
+    comportamiento? Medimos eso con la <b>sensibilidad logarítmica</b>:
+  </p>
+
+  <p class="mathblock">$$S_p^M = \frac{\partial \ln M}{\partial \ln p} \approx \frac{[M(p\cdot 1.05)-M(p\cdot 0.95)]/M(p)}{0.10}$$</p>
+
+  <div class="simple">
+    <p class="head">💡 En palabras simples</p>
+    <ul>
+      <li><span class="math-inline">M</span> es una métrica del comportamiento (punto fijo, periodo, amplitud…).</li>
+      <li><span class="math-inline">S_p^M</span> nos dice: si cambio <span class="math-inline">p</span> un 1%, ¿cuánto cambia <span class="math-inline">M</span>?</li>
+      <li>Si <span class="math-inline">S\approx 0</span>: insensible. Si <span class="math-inline">S\approx 1</span>: cambia igual. Si <span class="math-inline">|S|>1</span>: muy sensible.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Tabla de sensibilidades (±5% en cada parámetro)</p>
+    <div id="sensitivity-table"></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Perturba un parámetro y mira qué pasa</p>
+    <div class="controls">
+      <div class="ctl">
+        <label for="param-select-8">Parámetro a perturbar <span class="val" id="param-label-8">α</span></label>
+        <select id="param-select-8">
+          <option value="alpha">α · nacimiento de presas</option>
+          <option value="beta">β · eficiencia del depredador</option>
+          <option value="gamma">γ · conversión a depredadores</option>
+          <option value="delta">δ · muerte de depredadores</option>
+        </select>
+      </div>
+      <div class="ctl">
+        <label for="eps-slider-8">Cambio ε (%) <span class="val" id="eps-val-8">0</span></label>
+        <input type="range" id="eps-slider-8" min="-50" max="50" step="1" value="0">
+      </div>
+    </div>
+    <div class="plot-row">
+      <div id="plot-pert-ts" class="plot"></div>
+      <div id="plot-pert-phase" class="plot"></div>
+    </div>
+    <p class="info-line" id="info-pert-8">—</p>
+  </div>
+
+  <div class="callout green">
+    <span class="ico">Qué observar</span>
+    <ul style="margin:6px 0 0;">
+      <li>Tocar <span class="math-inline">\alpha</span> o <span class="math-inline">\delta</span> cambia el <b>periodo</b>: la curva se desfasa.</li>
+      <li>Tocar <span class="math-inline">\beta</span> o <span class="math-inline">\gamma</span> cambia la <b>amplitud</b>, pero casi no el periodo.</li>
+      <li>Esto coincide con la teoría: cada parámetro tiene una "función" distinta.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= SÍNTESIS ======================= -->
+<section id="sintesis">
+  <h2>Síntesis: el recorrido completo</h2>
+  <p class="step-sub">Los 8 pasos, resumidos en una tabla</p>
+
+  <table class="data">
+    <thead>
+      <tr><th>Paso</th><th>Pregunta</th><th>Herramienta</th><th>Conclusión</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>¿Quién interactúa con quién?</td><td>Diagrama de la red</td><td>4 reacciones + 2 modificadores</td></tr>
+      <tr><td>2</td><td>¿Cómo se escribe?</td><td>Acción de masas</td><td>Dos EDOs, términos lineales y bilineales</td></tr>
+      <tr><td>3</td><td>¿Qué se conserva?</td><td>Primera integral <span class="math-inline">V</span></td><td>Órbitas cerradas, todo se reduce a 1 parámetro</td></tr>
+      <tr><td>4</td><td>¿Contra qué valido?</td><td>Datos sintéticos</td><td>Oscilación + desfase <span class="math-inline">T/4</span> + promedios = punto fijo</td></tr>
+      <tr><td>5</td><td>¿Dónde está el equilibrio?</td><td>Jacobiano y autovalores</td><td>Silla en (0,0); centro en coexistencia</td></tr>
+      <tr><td>6</td><td>¿Cómo evoluciona en el tiempo?</td><td>Runge–Kutta 4</td><td>Ciclos sostenidos, conservación numérica</td></tr>
+      <tr><td>7</td><td>¿Qué parámetros explican los datos?</td><td>Levenberg–Marquardt + multi-arranque</td><td>Recupera la verdad dentro del ruido</td></tr>
+      <tr><td>8</td><td>¿Qué tan sensible es?</td><td>Sensibilidades logarítmicas</td><td>Periodo sensible a α y δ; amplitud a β y γ</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="ico">Mensaje final</span>
+    Todo el comportamiento del modelo viene del <b>diagrama del Paso 1</b>. Cada decisión de
+    modelado (qué reacciones incluir, cómo interactúan) se traduce en una propiedad dinámica
+    que puedes <b>verificar con la computadora</b>. La misma receta aplica a modelos mucho más
+    complejos: redes metabólicas, epidemias, ecosistemas enteros.
+  </div>
+</section>
+
+</main>
+
+<footer class="end">
+  Modelo Lotka–Volterra · Tutorial interactivo para estudiantes · Versión HTML/JS
+</footer>
+
+<script>
+// ============================================================
+//  RENDER KaTeX
+// ============================================================
+function renderAllMath() {
+  if (typeof renderMathInElement !== 'function') return;
+  renderMathInElement(document.body, {
+    delimiters: [
+      { left: '$$', right: '$$', display: true },
+      { left: '$', right: '$', display: false },
+      { left: '\\(', right: '\\)', display: false },
+      { left: '\\[', right: '\\]', display: true }
+    ],
+    throwOnError: false,
+    ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'option']
+  });
+}
+
+// ============================================================
+//  NÚCLEO COMPUTACIONAL
+// ============================================================
+function linspace(a, b, n) {
+  const arr = new Array(n);
+  for (let i = 0; i < n; i++) arr[i] = a + (b - a) * i / (n - 1);
+  return arr;
+}
+function lvRHS(t, z, p) {
+  const x = z[0], y = z[1];
+  return [p.alpha*x - p.beta*x*y, p.gamma*x*y - p.delta*y];
+}
+function rk4Step(t, z, dt, p) {
+  const k1 = lvRHS(t, z, p);
+  const k2 = lvRHS(t + dt/2, [z[0] + dt*k1[0]/2, z[1] + dt*k1[1]/2], p);
+  const k3 = lvRHS(t + dt/2, [z[0] + dt*k2[0]/2, z[1] + dt*k2[1]/2], p);
+  const k4 = lvRHS(t + dt,   [z[0] + dt*k3[0],   z[1] + dt*k3[1]],   p);
+  return [z[0] + dt*(k1[0] + 2*k2[0] + 2*k3[0] + k4[0])/6,
+          z[1] + dt*(k1[1] + 2*k2[1] + 2*k3[1] + k4[1])/6];
+}
+function simulate(p, x0, y0, opts) {
+  opts = opts || {};
+  const tEnd = opts.tEnd != null ? opts.tEnd : 60;
+  const npts = opts.npts != null ? opts.npts : 1500;
+  const nsub = opts.nsub != null ? opts.nsub : 8;
+  const t = opts.tEval || linspace(0, tEnd, npts);
+  const N = t.length;
+  const xArr = new Array(N), yArr = new Array(N);
+  xArr[0] = x0; yArr[0] = y0;
+  let z = [x0, y0], tCur = 0;
+  for (let i = 1; i < N; i++) {
+    const dt = (t[i] - tCur) / nsub;
+    for (let s = 0; s < nsub; s++) {
+      z = rk4Step(tCur, z, dt, p);
+      tCur += dt;
+    }
+    xArr[i] = z[0]; yArr[i] = z[1];
+  }
+  return { t, x: xArr, y: yArr };
+}
+function eqCoexist(p) { return [p.delta/p.gamma, p.alpha/p.beta]; }
+function firstIntegral(x, y, p) {
+  return p.gamma*x - p.delta*Math.log(x) + p.beta*y - p.alpha*Math.log(y);
+}
+function periodLin(p) { return 2*Math.PI / Math.sqrt(p.alpha * p.delta); }
+function findPeaks(v, minDist) {
+  const n = v.length, peaks = [];
+  for (let i = 1; i < n-1; i++) if (v[i] > v[i-1] && v[i] >= v[i+1]) peaks.push(i);
+  const filtered = [];
+  for (const p of peaks) {
+    if (filtered.length === 0 || p - filtered[filtered.length-1] >= minDist) filtered.push(p);
+    else if (v[p] > v[filtered[filtered.length-1]]) filtered[filtered.length-1] = p;
+  }
+  return filtered;
+}
+function peakTimes(t, v, minDistFrac) {
+  const minDist = Math.max(2, Math.floor(t.length * (minDistFrac || 0.05)));
+  return findPeaks(v, minDist).map(i => t[i]);
+}
+function simPeriod(t, v) {
+  const tp = peakTimes(t, v);
+  if (tp.length < 2) return NaN;
+  let s = 0;
+  for (let i = 1; i < tp.length; i++) s += tp[i] - tp[i-1];
+  return s / (tp.length - 1);
+}
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = seed;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function gaussianPair(rng) {
+  const u = Math.max(rng(), 1e-12), v = rng();
+  const r = Math.sqrt(-2 * Math.log(u));
+  return [r * Math.cos(2*Math.PI*v), r * Math.sin(2*Math.PI*v)];
+}
+function gaussianN(rng, n) {
+  const out = [];
+  while (out.length < n) {
+    const [a, b] = gaussianPair(rng);
+    out.push(a); if (out.length < n) out.push(b);
+  }
+  return out;
+}
+function solveLinear(A, b) {
+  const n = b.length;
+  const M = A.map((row, i) => [...row, b[i]]);
+  for (let i = 0; i < n; i++) {
+    let maxRow = i;
+    for (let k = i+1; k < n; k++) if (Math.abs(M[k][i]) > Math.abs(M[maxRow][i])) maxRow = k;
+    [M[i], M[maxRow]] = [M[maxRow], M[i]];
+    const piv = M[i][i];
+    if (Math.abs(piv) < 1e-14) continue;
+    for (let j = i; j <= n; j++) M[i][j] /= piv;
+    for (let k = 0; k < n; k++) {
+      if (k === i) continue;
+      const f = M[k][i];
+      for (let j = i; j <= n; j++) M[k][j] -= f * M[i][j];
+    }
+  }
+  return M.map(row => row[n]);
+}
+
+// ============================================================
+//  CONSTANTES Y DATOS
+// ============================================================
+const P0 = { alpha: 1.1, beta: 0.4, gamma: 0.10, delta: 0.40 };
+const P_TRUE = { ...P0 };
+const X0_TRUE = 6.0, Y0_TRUE = 2.0;
+const NOISE = 0.05;
+const t_data = linspace(0, 40, 81);
+const simTrueData = simulate(P_TRUE, X0_TRUE, Y0_TRUE, { tEval: t_data, nsub: 10 });
+const rngData = mulberry32(42);
+const noiseX = gaussianN(rngData, t_data.length);
+const noiseY = gaussianN(rngData, t_data.length);
+const DATA = {
+  t: t_data,
+  x: simTrueData.x.map((v, i) => Math.max(0, v * (1 + NOISE * noiseX[i]))),
+  y: simTrueData.y.map((v, i) => Math.max(0, v * (1 + NOISE * noiseY[i])))
+};
+
+// ============================================================
+//  PLOTLY
+// ============================================================
+const PLOTLY_CONFIG = { responsive: true, displayModeBar: false };
+const BASE_LAYOUT = {
+  paper_bgcolor: '#ffffff', plot_bgcolor: '#ffffff',
+  font: { family: 'Inter, system-ui, sans-serif', size: 12, color: '#1f2937' },
+  margin: { l: 55, r: 16, t: 42, b: 48 },
+  showlegend: true,
+  legend: { orientation: 'h', y: -0.22, x: 0, font: { size: 11 } },
+  hovermode: 'closest'
+};
+const AXIS_STYLE = {
+  gridcolor: '#eef1f5', zerolinecolor: '#d1d5db',
+  linecolor: '#d1d5db', ticks: 'outside', tickcolor: '#d1d5db'
+};
+function baseLayout(extra) {
+  const layout = JSON.parse(JSON.stringify(BASE_LAYOUT));
+  layout.xaxis = { ...AXIS_STYLE };
+  layout.yaxis = { ...AXIS_STYLE };
+  if (extra) {
+    Object.keys(extra).forEach(k => {
+      if (k === 'xaxis' || k === 'yaxis') layout[k] = { ...AXIS_STYLE, ...extra[k] };
+      else layout[k] = extra[k];
+    });
+  }
+  return layout;
+}
+function drawPlot(id, traces, layoutExtra) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  Plotly.react(el, traces, baseLayout(layoutExtra), PLOTLY_CONFIG);
+}
+
+// ============================================================
+//  PASO 1
+// ============================================================
+(function setupNetwork() {
+  const sel = document.getElementById('rx-select');
+  const label = document.getElementById('rx-label');
+  const svg = document.getElementById('network-svg');
+  const groups = svg.querySelectorAll('g.rx');
+  const labels = { 'none': '—', 'R1': 'R1', 'R2': 'R2', 'R3': 'R3', 'R4': 'R4' };
+  function apply(rx) {
+    label.textContent = labels[rx] || '—';
+    groups.forEach(g => {
+      g.classList.remove('highlight', 'dim');
+      if (rx === 'none') return;
+      if (g.dataset.rx === rx) g.classList.add('highlight');
+      else g.classList.add('dim');
+    });
+  }
+  sel.addEventListener('change', () => apply(sel.value));
+  apply('none');
+})();
+
+// ============================================================
+//  PASO 2
+// ============================================================
+(function setupTerms() {
+  const xS = document.getElementById('x-slider-2');
+  const yS = document.getElementById('y-slider-2');
+  const xV = document.getElementById('x-val-2');
+  const yV = document.getElementById('y-val-2');
+  function render() {
+    const x = parseFloat(xS.value), y = parseFloat(yS.value);
+    xV.textContent = x.toFixed(1); yV.textContent = y.toFixed(1);
+    const R1 = P0.alpha*x, R2 = P0.beta*x*y;
+    const R3 = P0.gamma*x*y, R4 = P0.delta*y;
+    const dxdt = R1 - R2, dydt = R3 - R4;
+    const labs = ['+αx (R1)', '−βxy (R2)', '+γxy (R3)', '−δy (R4)'];
+    const vals = [R1, -R2, R3, -R4];
+    const cols = vals.map(v => v >= 0 ? '#15803d' : '#b91c1c');
+    drawPlot('plot-terms', [{
+      type: 'bar', x: labs, y: vals,
+      marker: { color: cols, line: { width: 0 } },
+      hovertemplate: '%{x}: %{y:.3f}<extra></extra>'
+    }], {
+      title: { text: `Términos individuales (x=${x.toFixed(1)}, y=${y.toFixed(1)})`, font: { size: 12.5 }, x: 0.02 },
+      showlegend: false,
+      margin: { l: 55, r: 16, t: 42, b: 60 },
+      xaxis: { tickfont: { size: 10 } },
+      yaxis: { ...AXIS_STYLE, zerolinecolor: '#111827', zerolinewidth: 1.2 }
+    });
+    drawPlot('plot-balance', [{
+      type: 'bar', x: ['dx/dt', 'dy/dt'], y: [dxdt, dydt],
+      marker: { color: ['#1e40af', '#6d28d9'] },
+      text: [dxdt.toFixed(2), dydt.toFixed(2)],
+      textposition: 'outside', textfont: { size: 11, color: '#1f2937' },
+      hovertemplate: '%{x}: %{y:.3f}<extra></extra>'
+    }], {
+      title: { text: 'Derivadas resultantes (balance)', font: { size: 12.5 }, x: 0.02 },
+      showlegend: false,
+      margin: { l: 55, r: 16, t: 42, b: 48 },
+      yaxis: { ...AXIS_STYLE, zerolinecolor: '#111827', zerolinewidth: 1.2 }
+    });
+  }
+  [xS, yS].forEach(s => s.addEventListener('input', render));
+  render();
+})();
+
+// ============================================================
+//  PASO 3
+// ============================================================
+(function setupConservation() {
+  const xS = document.getElementById('x0-slider-3');
+  const yS = document.getElementById('y0-slider-3');
+  const xV = document.getElementById('x0-val-3');
+  const yV = document.getElementById('y0-val-3');
+  const info = document.getElementById('info-drift-3');
+  function render() {
+    const x0 = parseFloat(xS.value), y0 = parseFloat(yS.value);
+    xV.textContent = x0.toFixed(1); yV.textContent = y0.toFixed(1);
+    const sim = simulate(P0, x0, y0, { tEnd: 40, npts: 1200, nsub: 10 });
+    const Vt = sim.x.map((xv, i) => firstIntegral(xv, sim.y[i], P0));
+    const V0 = Vt[0];
+    let drift = 0;
+    for (let i = 0; i < Vt.length; i++) {
+      const d = Math.abs(Vt[i] - V0);
+      if (d > drift) drift = d;
+    }
+    const gx = linspace(0.4, 12, 220), gy = linspace(0.3, 8, 220);
+    const zGrid = [];
+    for (let j = 0; j < gy.length; j++) {
+      const row = [];
+      for (let i = 0; i < gx.length; i++) row.push(firstIntegral(gx[i], gy[j], P0));
+      zGrid.push(row);
+    }
+    drawPlot('plot-conserv', [
+      { type: 'contour', x: gx, y: gy, z: zGrid,
+        contours: { coloring: 'none', showlabels: false },
+        line: { color: 'rgba(200,210,225,0.7)', width: 1 },
+        showscale: false, showlegend: false, hoverinfo: 'skip' },
+      { type: 'contour', x: gx, y: gy, z: zGrid,
+        contours: { type: 'constraint', operation: '=', value: V0, coloring: 'lines' },
+        line: { color: '#15803d', width: 3 },
+        showscale: false, showlegend: false, hoverinfo: 'skip', name: 'V = V₀' },
+      { type: 'scatter', mode: 'lines', x: sim.x, y: sim.y,
+        line: { color: '#1e40af', width: 1.5 }, name: 'trayectoria' },
+      { type: 'scatter', mode: 'markers', x: [x0], y: [y0],
+        marker: { color: '#111827', size: 8, line: { color: '#fff', width: 1.5 } },
+        name: '(x₀, y₀)' }
+    ], {
+      title: { text: `Órbita = curva de nivel de V (deriva=${drift.toExponential(1)})`, font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 'x', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE, title: { text: 'y', font: { size: 11 } } }
+    });
+    drawPlot('plot-drift', [
+      { type: 'scatter', mode: 'lines', x: sim.t, y: Vt.map(v => v - V0),
+        line: { color: '#b91c1c', width: 1.4 }, name: 'V(t) − V(0)' }
+    ], {
+      title: { text: 'V(t) − V(0): solo error numérico', font: { size: 12.5 }, x: 0.02 },
+      showlegend: false,
+      xaxis: { ...AXIS_STYLE, title: { text: 't', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE }
+    });
+    info.innerHTML = `Órbita cerrada · deriva máxima de <b>V</b>: <span class="result green">${drift.toExponential(2)}</span> · la conservación es exacta en el modelo continuo.`;
+  }
+  [xS, yS].forEach(s => s.addEventListener('input', render));
+  render();
+})();
+
+// ============================================================
+//  PASO 4
+// ============================================================
+(function setupData() {
+  const infoData = document.getElementById('info-data-4');
+  const px = peakTimes(DATA.t, DATA.x, 0.05);
+  const py = peakTimes(DATA.t, DATA.y, 0.05);
+  const meanX = DATA.x.reduce((a,b) => a+b, 0) / DATA.x.length;
+  const meanY = DATA.y.reduce((a,b) => a+b, 0) / DATA.y.length;
+  const T_data = px.length >= 2 ? (px[px.length-1] - px[0]) / (px.length - 1) : NaN;
+  const n_pair = Math.min(px.length, py.length);
+  let lag = NaN;
+  if (n_pair > 0) {
+    let s = 0;
+    for (let i = 0; i < n_pair; i++) s += py[i] - px[i];
+    lag = s / n_pair;
+  }
+  const [xs_eq, ys_eq] = eqCoexist(P_TRUE);
+  const T_lin = periodLin(P_TRUE);
+  infoData.innerHTML =
+    `<b>Datos:</b> ⟨x⟩ = ${meanX.toFixed(2)} (esperado x* = ${xs_eq.toFixed(2)}) · ` +
+    `⟨y⟩ = ${meanY.toFixed(2)} (esperado y* = ${ys_eq.toFixed(2)}) · ` +
+    `periodo T ≈ ${T_data.toFixed(2)} (lineal 2π/√(αδ) = ${T_lin.toFixed(2)}) · ` +
+    `desfase presa→depredador ≈ ${lag.toFixed(2)} ≈ T/4 = ${(T_data/4).toFixed(2)} <span class="result green">✓</span>`;
+  drawPlot('plot-data', [
+    { type: 'scatter', mode: 'markers', x: DATA.t, y: DATA.x,
+      marker: { size: 5, color: 'rgba(21,128,61,0)', line: { color: '#15803d', width: 1.2 } },
+      name: 'datos presas' },
+    { type: 'scatter', mode: 'markers', x: DATA.t, y: DATA.y,
+      marker: { size: 5, color: 'rgba(185,28,28,0)', symbol: 'square', line: { color: '#b91c1c', width: 1.2 } },
+      name: 'datos depredadores' },
+    { type: 'scatter', mode: 'lines', x: DATA.t, y: simTrueData.x,
+      line: { color: '#15803d', width: 1.4, dash: 'dot' }, name: 'verdad x(t)' },
+    { type: 'scatter', mode: 'lines', x: DATA.t, y: simTrueData.y,
+      line: { color: '#b91c1c', width: 1.4, dash: 'dot' }, name: 'verdad y(t)' }
+  ], {
+    title: { text: 'Datos sintéticos (ruido multiplicativo del 5 %)', font: { size: 12.5 }, x: 0.02 },
+    xaxis: { ...AXIS_STYLE, title: { text: 't', font: { size: 11 } } },
+    yaxis: { ...AXIS_STYLE, title: { text: 'población', font: { size: 11 } } }
+  });
+
+  const xS = document.getElementById('x0-slider-4');
+  const yS = document.getElementById('y0-slider-4');
+  const xV = document.getElementById('x0-val-4');
+  const yV = document.getElementById('y0-val-4');
+  function renderFit() {
+    const x0 = parseFloat(xS.value), y0 = parseFloat(yS.value);
+    xV.textContent = x0.toFixed(1); yV.textContent = y0.toFixed(1);
+    const sim = simulate(P0, x0, y0, { tEnd: 40, npts: 800, nsub: 8 });
+    drawPlot('plot-data-fit', [
+      { type: 'scatter', mode: 'markers', x: DATA.t, y: DATA.x,
+        marker: { size: 4, color: 'rgba(21,128,61,0)', line: { color: '#15803d', width: 1 } },
+        name: 'datos x' },
+      { type: 'scatter', mode: 'markers', x: DATA.t, y: DATA.y,
+        marker: { size: 4, color: 'rgba(185,28,28,0)', symbol: 'square', line: { color: '#b91c1c', width: 1 } },
+        name: 'datos y' },
+      { type: 'scatter', mode: 'lines', x: sim.t, y: sim.x,
+        line: { color: '#15803d', width: 1.5 }, name: 'modelo x(t)' },
+      { type: 'scatter', mode: 'lines', x: sim.t, y: sim.y,
+        line: { color: '#b91c1c', width: 1.5 }, name: 'modelo y(t)' }
+    ], {
+      title: { text: `CI candidatas (${x0.toFixed(1)}, ${y0.toFixed(1)}) vs. datos`, font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 't', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE, title: { text: 'población', font: { size: 11 } } }
+    });
+  }
+  [xS, yS].forEach(s => s.addEventListener('input', renderFit));
+  renderFit();
+})();
+
+// ============================================================
+//  PASO 5
+// ============================================================
+(function setupSteady() {
+  const ids = { alpha: 'a-slider-5', beta: 'b-slider-5', gamma: 'g-slider-5', delta: 'd-slider-5' };
+  const vals = { alpha: 'a-val-5', beta: 'b-val-5', gamma: 'g-val-5', delta: 'd-val-5' };
+  const info = document.getElementById('info-steady-5');
+  function render() {
+    const p = {};
+    for (const k in ids) {
+      p[k] = parseFloat(document.getElementById(ids[k]).value);
+      document.getElementById(vals[k]).textContent = p[k].toFixed(2);
+    }
+    const [xs_eq, ys_eq] = eqCoexist(p);
+    const T_lin = periodLin(p);
+    const sim = simulate(p, 6, 2, { tEnd: 60, npts: 1500, nsub: 8 });
+    drawPlot('plot-steady-ts', [
+      { type: 'scatter', mode: 'lines', x: sim.t, y: sim.x, line: { color: '#15803d', width: 1.4 }, name: 'x(t)' },
+      { type: 'scatter', mode: 'lines', x: sim.t, y: sim.y, line: { color: '#b91c1c', width: 1.4 }, name: 'y(t)' },
+      { type: 'scatter', mode: 'lines', x: [0, 60], y: [xs_eq, xs_eq], line: { color: '#15803d', width: 1, dash: 'dot' }, name: 'x*' },
+      { type: 'scatter', mode: 'lines', x: [0, 60], y: [ys_eq, ys_eq], line: { color: '#b91c1c', width: 1, dash: 'dot' }, name: 'y*' }
+    ], {
+      title: { text: `Series temporales · T_lin = ${T_lin.toFixed(2)}`, font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 't', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE }
+    });
+    drawPlot('plot-steady-phase', [
+      { type: 'scatter', mode: 'lines', x: sim.x, y: sim.y, line: { color: '#1e40af', width: 1.4 }, name: 'órbita' },
+      { type: 'scatter', mode: 'markers', x: [xs_eq], y: [ys_eq], marker: { color: '#b91c1c', symbol: 'star', size: 14, line: { color: '#7f1d1d', width: 1 } }, name: 'coexistencia' },
+      { type: 'scatter', mode: 'markers', x: [0], y: [0], marker: { color: '#111827', symbol: 'square', size: 8 }, name: 'extinción (silla)' }
+    ], {
+      title: { text: `λ = ±i·${Math.sqrt(p.alpha*p.delta).toFixed(2)} (centro lineal)`, font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 'x', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE, title: { text: 'y', font: { size: 11 } } }
+    });
+    info.innerHTML =
+      `<b>Punto fijo de coexistencia:</b> (x*, y*) = (${xs_eq.toFixed(3)}, ${ys_eq.toFixed(3)}) · ` +
+      `λ(0,0) = (α, −δ) = (${p.alpha.toFixed(2)}, −${p.delta.toFixed(2)}) → <b>punto silla</b> · ` +
+      `λ(coexistencia) = ±i√(αδ) = ±i·${Math.sqrt(p.alpha*p.delta).toFixed(3)} → <b>centro lineal</b>`;
+  }
+  Object.values(ids).forEach(id => document.getElementById(id).addEventListener('input', render));
+  render();
+})();
+
+// ============================================================
+//  PASO 6
+// ============================================================
+(function setupDynamics() {
+  const pIds = { alpha: 'a-slider-6', beta: 'b-slider-6', gamma: 'g-slider-6', delta: 'd-slider-6' };
+  const pVals = { alpha: 'a-val-6', beta: 'b-val-6', gamma: 'g-val-6', delta: 'd-val-6' };
+  const xS = document.getElementById('x0-slider-6');
+  const yS = document.getElementById('y0-slider-6');
+  const tS = document.getElementById('t-slider-6');
+  const xV = document.getElementById('x0-val-6');
+  const yV = document.getElementById('y0-val-6');
+  const tV = document.getElementById('t-val-6');
+  const info = document.getElementById('info-dyn-6');
+  function render() {
+    const p = {};
+    for (const k in pIds) {
+      p[k] = parseFloat(document.getElementById(pIds[k]).value);
+      document.getElementById(pVals[k]).textContent = p[k].toFixed(2);
+    }
+    const x0 = parseFloat(xS.value), y0 = parseFloat(yS.value), tEnd = parseFloat(tS.value);
+    xV.textContent = x0.toFixed(1); yV.textContent = y0.toFixed(1); tV.textContent = tEnd.toFixed(0);
+    const sim = simulate(p, x0, y0, { tEnd, npts: 2500, nsub: 8 });
+    const Vt = sim.x.map((xv, i) => firstIntegral(xv, sim.y[i], p));
+    const V0 = Vt[0];
+    let drift = 0;
+    for (let i = 0; i < Vt.length; i++) {
+      const d = Math.abs(Vt[i] - V0);
+      if (d > drift) drift = d;
+    }
+    const Tsim = simPeriod(sim.t, sim.x);
+    const Tlin = periodLin(p);
+    const [xs_eq, ys_eq] = eqCoexist(p);
+    drawPlot('plot-dyn-ts', [
+      { type: 'scatter', mode: 'lines', x: sim.t, y: sim.x, line: { color: '#15803d', width: 1.4 }, name: 'x(t)' },
+      { type: 'scatter', mode: 'lines', x: sim.t, y: sim.y, line: { color: '#b91c1c', width: 1.4 }, name: 'y(t)' }
+    ], {
+      title: { text: `T_sim=${isNaN(Tsim) ? '—' : Tsim.toFixed(2)} vs T_lin=${Tlin.toFixed(2)} · deriva V=${drift.toExponential(1)}`, font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 't', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE }
+    });
+    drawPlot('plot-dyn-phase', [
+      { type: 'scatter', mode: 'lines', x: sim.x, y: sim.y, line: { color: '#1e40af', width: 1.4 }, name: 'órbita' },
+      { type: 'scatter', mode: 'markers', x: [x0], y: [y0], marker: { color: '#111827', size: 8, line: { color: '#fff', width: 1.5 } }, name: '(x₀, y₀)' },
+      { type: 'scatter', mode: 'markers', x: [xs_eq], y: [ys_eq], marker: { color: '#b91c1c', symbol: 'star', size: 14, line: { color: '#7f1d1d', width: 1 } }, name: 'coexistencia' }
+    ], {
+      title: { text: 'Plano de fase', font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 'x', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE, title: { text: 'y', font: { size: 11 } } }
+    });
+    info.innerHTML =
+      `T_sim = <b>${isNaN(Tsim) ? '—' : Tsim.toFixed(3)}</b> · ` +
+      `T_lin = <b>${Tlin.toFixed(3)}</b> · ` +
+      `deriva máx de V = <span class="result green">${drift.toExponential(2)}</span> · ` +
+      `punto fijo = (${xs_eq.toFixed(2)}, ${ys_eq.toFixed(2)})`;
+  }
+  [...Object.values(pIds), xS.id, yS.id, tS.id].forEach(id => {
+    document.getElementById(id).addEventListener('input', render);
+  });
+  render();
+})();
+
+// ============================================================
+//  PASO 7
+// ============================================================
+(function setupFitting() {
+  function residuals(theta) {
+    const p = { alpha: theta[0], beta: theta[1], gamma: theta[2], delta: theta[3] };
+    const sim = simulate(p, X0_TRUE, Y0_TRUE, { tEval: DATA.t, nsub: 8 });
+    const n = DATA.t.length;
+    const r = new Array(2 * n);
+    for (let i = 0; i < n; i++) {
+      r[i] = sim.x[i] - DATA.x[i];
+      r[i + n] = sim.y[i] - DATA.y[i];
+    }
+    return r;
+  }
+  function sse(theta) {
+    const r = residuals(theta);
+    let s = 0;
+    for (let i = 0; i < r.length; i++) s += r[i]*r[i];
+    return s;
+  }
+  function levMar(logTheta0, maxIter) {
+    maxIter = maxIter || 60;
+    let logTheta = logTheta0.slice();
+    let r = residuals(logTheta.map(Math.exp));
+    let cost = r.reduce((s, v) => s + v*v, 0);
+    let lambda = 1e-3;
+    const n = logTheta.length;
+    for (let it = 0; it < maxIter; it++) {
+      const m = r.length;
+      const J = Array.from({ length: m }, () => new Array(n).fill(0));
+      for (let j = 0; j < n; j++) {
+        const h = Math.max(1e-4, Math.abs(logTheta[j]) * 1e-4);
+        const tp = logTheta.slice(); tp[j] += h;
+        const rp = residuals(tp.map(Math.exp));
+        for (let i = 0; i < m; i++) J[i][j] = (rp[i] - r[i]) / h;
+      }
+      const JtJ = Array.from({ length: n }, () => new Array(n).fill(0));
+      const Jtr = new Array(n).fill(0);
+      for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+          Jtr[j] += J[i][j] * r[i];
+          for (let k = 0; k < n; k++) JtJ[j][k] += J[i][j] * J[i][k];
+        }
+      }
+      let accepted = false;
+      for (let trial = 0; trial < 10; trial++) {
+        const A = JtJ.map((row, i) => row.map((v, j) => i === j ? v + lambda * (v + 1e-8) : v));
+        const delta = solveLinear(A, Jtr.map(v => -v));
+        let stepNorm = 0;
+        for (let i = 0; i < n; i++) stepNorm += delta[i]*delta[i];
+        stepNorm = Math.sqrt(stepNorm);
+        const newLog = logTheta.map((v, i) => v + delta[i]);
+        const rNew = residuals(newLog.map(Math.exp));
+        const costNew = rNew.reduce((s, v) => s + v*v, 0);
+        if (costNew < cost && isFinite(costNew)) {
+          logTheta = newLog; r = rNew; cost = costNew;
+          lambda = Math.max(lambda * 0.5, 1e-10);
+          accepted = true;
+          if (stepNorm < 1e-6) return { theta: logTheta.map(Math.exp), cost, nfev: it * (n+1) };
+          break;
+        } else lambda *= 4;
+      }
+      if (!accepted) break;
+    }
+    return { theta: logTheta.map(Math.exp), cost, nfev: maxIter * (n+1) };
+  }
+  const aS = document.getElementById('a-slider-7');
+  const dS = document.getElementById('d-slider-7');
+  const aV = document.getElementById('a-val-7');
+  const dV = document.getElementById('d-val-7');
+  const info = document.getElementById('info-slice-7');
+  const gridA = linspace(0.2, 2.5, 60);
+  const gridD = linspace(0.1, 1.0, 60);
+  const SgridA = gridA.map(av => Math.log10(1 + sse([av, P_TRUE.beta, P_TRUE.gamma, P_TRUE.delta])));
+  const SgridD = gridD.map(dv => Math.log10(1 + sse([P_TRUE.alpha, P_TRUE.beta, P_TRUE.gamma, dv])));
+  function renderSlice() {
+    const alpha = parseFloat(aS.value), delta = parseFloat(dS.value);
+    aV.textContent = alpha.toFixed(2); dV.textContent = delta.toFixed(2);
+    const ScurA = Math.log10(1 + sse([alpha, P_TRUE.beta, P_TRUE.gamma, P_TRUE.delta]));
+    const ScurD = Math.log10(1 + sse([P_TRUE.alpha, P_TRUE.beta, P_TRUE.gamma, delta]));
+    drawPlot('plot-slice-alpha', [
+      { type: 'scatter', mode: 'lines', x: gridA, y: SgridA, line: { color: '#1e40af', width: 1.6 }, name: 'SSE log10' },
+      { type: 'scatter', mode: 'lines', x: [P_TRUE.alpha, P_TRUE.alpha], y: [Math.min(...SgridA), Math.max(...SgridA)], line: { color: '#111827', dash: 'dot', width: 1.4 }, name: 'verdad α' },
+      { type: 'scatter', mode: 'markers', x: [alpha], y: [ScurA], marker: { color: '#b91c1c', size: 10, line: { color: '#fff', width: 1.5 } }, name: 'slider' }
+    ], {
+      title: { text: 'log10(1 + SSE) · corte en α', font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 'α', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE, title: { text: 'log10(1+SSE)', font: { size: 11 } } }
+    });
+    drawPlot('plot-slice-delta', [
+      { type: 'scatter', mode: 'lines', x: gridD, y: SgridD, line: { color: '#15803d', width: 1.6 }, name: 'SSE log10' },
+      { type: 'scatter', mode: 'lines', x: [P_TRUE.delta, P_TRUE.delta], y: [Math.min(...SgridD), Math.max(...SgridD)], line: { color: '#111827', dash: 'dot', width: 1.4 }, name: 'verdad δ' },
+      { type: 'scatter', mode: 'markers', x: [delta], y: [ScurD], marker: { color: '#b91c1c', size: 10, line: { color: '#fff', width: 1.5 } }, name: 'slider' }
+    ], {
+      title: { text: 'log10(1 + SSE) · corte en δ', font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 'δ', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE, title: { text: 'log10(1+SSE)', font: { size: 11 } } }
+    });
+    info.innerHTML =
+      `α verdadero = <b>${P_TRUE.alpha}</b> · δ verdadero = <b>${P_TRUE.delta}</b> · ` +
+      `SSE actual (α,δ) vs. verdad: <span class="result">${sse([alpha, P_TRUE.beta, P_TRUE.gamma, delta]).toFixed(2)}</span>`;
+  }
+  [aS, dS].forEach(s => s.addEventListener('input', renderSlice));
+  renderSlice();
+  const fitBtn = document.getElementById('fit-btn');
+  const fitStatus = document.getElementById('fit-status');
+  const fitRes = document.getElementById('fit-results');
+  fitBtn.addEventListener('click', () => {
+    fitBtn.disabled = true;
+    fitStatus.textContent = 'Optimizando (6 arranques)…';
+    setTimeout(() => {
+      const rng = mulberry32(7);
+      const trueVec = [P_TRUE.alpha, P_TRUE.beta, P_TRUE.gamma, P_TRUE.delta];
+      const results = [];
+      for (let k = 0; k < 6; k++) {
+        const guess = trueVec.map(v => v * (0.5 + rng() * 1.5));
+        const sol = levMar(guess.map(Math.log), 50);
+        results.push({ cost: 2 * sol.cost, theta: sol.theta, nfev: sol.nfev });
+      }
+      results.sort((a, b) => a.cost - b.cost);
+      const best = results[0];
+      let html = `<table class="data"><thead><tr><th>parám</th><th>verdad</th><th>ajustado</th><th>error</th></tr></thead><tbody>`;
+      const disp = ['α', 'β', 'γ', 'δ'];
+      for (let i = 0; i < 4; i++) {
+        const tv = trueVec[i], tb = best.theta[i];
+        const err = 100 * (tb - tv) / tv;
+        const cls = Math.abs(err) < 10 ? 'result green' : 'result red';
+        html += `<tr><td>${disp[i]}</td><td class="mono">${tv.toFixed(3)}</td><td class="mono">${tb.toFixed(3)}</td><td><span class="${cls}">${err >= 0 ? '+' : ''}${err.toFixed(1)}%</span></td></tr>`;
+      }
+      html += `</tbody></table>`;
+      html += `<p style="font-size:13.5px; color:var(--muted); margin:10px 0 0;">S<sub>best</sub> = ${best.cost.toFixed(2)} · ${best.nfev} evals de EDO por arranque.</p>`;
+      html += `<table class="data" style="margin-top:14px;"><thead><tr><th>Arranque</th><th>S = 2·cost</th><th>α</th><th>β</th><th>γ</th><th>δ</th></tr></thead><tbody>`;
+      results.forEach((r, i) => {
+        html += `<tr><td>${i+1}</td><td class="mono">${r.cost.toFixed(2)}</td>` +
+                r.theta.map(v => `<td class="mono">${v.toFixed(3)}</td>`).join('') + `</tr>`;
+      });
+      html += `</tbody></table>`;
+      fitRes.innerHTML = html;
+      const p = { alpha: best.theta[0], beta: best.theta[1], gamma: best.theta[2], delta: best.theta[3] };
+      const sim = simulate(p, X0_TRUE, Y0_TRUE, { tEval: DATA.t, nsub: 10 });
+      drawPlot('plot-fit-best', [
+        { type: 'scatter', mode: 'markers', x: DATA.t, y: DATA.x, marker: { size: 5, color: 'rgba(21,128,61,0)', line: { color: '#15803d', width: 1.2 } }, name: 'datos x' },
+        { type: 'scatter', mode: 'markers', x: DATA.t, y: DATA.y, marker: { size: 5, color: 'rgba(185,28,28,0)', symbol: 'square', line: { color: '#b91c1c', width: 1.2 } }, name: 'datos y' },
+        { type: 'scatter', mode: 'lines', x: DATA.t, y: sim.x, line: { color: '#15803d', width: 1.6 }, name: 'ajuste x(t)' },
+        { type: 'scatter', mode: 'lines', x: DATA.t, y: sim.y, line: { color: '#b91c1c', width: 1.6 }, name: 'ajuste y(t)' }
+      ], {
+        title: { text: 'Paso 7 · modelo ajustado vs. datos', font: { size: 12.5 }, x: 0.02 },
+        xaxis: { ...AXIS_STYLE, title: { text: 't', font: { size: 11 } } },
+        yaxis: { ...AXIS_STYLE }
+      });
+      fitStatus.textContent = `Listo. Mejor S = ${best.cost.toFixed(2)}`;
+      fitBtn.disabled = false;
+    }, 30);
+  });
+})();
+
+// ============================================================
+//  PASO 8
+// ============================================================
+(function setupSensitivity() {
+  function metrics(p, x0, y0, tEnd) {
+    x0 = x0 != null ? x0 : 6.0;
+    y0 = y0 != null ? y0 : 2.0;
+    tEnd = tEnd != null ? tEnd : 80.0;
+    const [xs_eq, ys_eq] = eqCoexist(p);
+    const sim = simulate(p, x0, y0, { tEnd, npts: 2500, nsub: 8 });
+    const tail = Math.floor(sim.t.length * 0.4);
+    const t_tail = sim.t.slice(tail);
+    const x_tail = sim.x.slice(tail);
+    let minX = Infinity, maxX = -Infinity;
+    for (const v of x_tail) { if (v < minX) minX = v; if (v > maxX) maxX = v; }
+    return { x_star: xs_eq, y_star: ys_eq, T_lin: periodLin(p), T_sim: simPeriod(t_tail, x_tail), A_x: 0.5 * (maxX - minX) };
+  }
+  const M0 = metrics(P0);
+  const PARAMS = ['alpha', 'beta', 'gamma', 'delta'];
+  const PARAM_LABELS = { alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ' };
+  const METRIC_LABELS = { x_star: 'x*', y_star: 'y*', T_lin: 'T_lin', T_sim: 'T_sim', A_x: 'A_x' };
+  const sens = {};
+  for (const m in M0) sens[m] = {};
+  for (const q of PARAMS) {
+    const pp = { ...P0 }; pp[q] = P0[q] * 1.05;
+    const pm = { ...P0 }; pm[q] = P0[q] * 0.95;
+    const Mp = metrics(pp), Mm = metrics(pm);
+    for (const m in M0) sens[m][q] = ((Mp[m] - Mm[m]) / M0[m]) / 0.10;
+  }
+  const tbl = document.getElementById('sensitivity-table');
+  let html = `<table class="data"><thead><tr><th>Métrica</th>`;
+  for (const q of PARAMS) html += `<th>S<sub>${PARAM_LABELS[q]}</sub></th>`;
+  html += `</tr></thead><tbody>`;
+  for (const m of Object.keys(M0)) {
+    html += `<tr><td>${METRIC_LABELS[m] || m}</td>`;
+    for (const q of PARAMS) {
+      const v = sens[m][q];
+      const cls = Math.abs(v) > 0.5 ? 'result' : '';
+      html += `<td><span class="${cls}">${v >= 0 ? '+' : ''}${v.toFixed(2)}</span></td>`;
+    }
+    html += `</tr>`;
+  }
+  html += `</tbody></table>`;
+  html += `<p style="font-size:13.5px; color:var(--muted); margin:10px 0 0;">
+    Valores esperados: S<sub>δ</sub><sup>x*</sup> = +1, S<sub>γ</sub><sup>x*</sup> = −1,
+    S<sub>α</sub><sup>y*</sup> = +1, S<sub>β</sub><sup>y*</sup> = −1,
+    S<sub>α</sub><sup>T</sup> = S<sub>δ</sub><sup>T</sup> = −0.5, ceros en el resto.</p>`;
+  tbl.innerHTML = html;
+
+  const paramS = document.getElementById('param-select-8');
+  const epsS = document.getElementById('eps-slider-8');
+  const paramLbl = document.getElementById('param-label-8');
+  const epsLbl = document.getElementById('eps-val-8');
+  const info = document.getElementById('info-pert-8');
+  function render() {
+    const param = paramS.value;
+    const eps = parseFloat(epsS.value);
+    paramLbl.textContent = PARAM_LABELS[param];
+    epsLbl.textContent = eps.toFixed(0);
+    const pp = { ...P0 }; pp[param] = P0[param] * (1 + eps / 100.0);
+    const simBase = simulate(P0, 6, 2, { tEnd: 60, npts: 1800, nsub: 8 });
+    const simPert = simulate(pp, 6, 2, { tEnd: 60, npts: 1800, nsub: 8 });
+    const M1 = metrics(pp);
+    drawPlot('plot-pert-ts', [
+      { type: 'scatter', mode: 'lines', x: simBase.t, y: simBase.x, line: { color: '#15803d', width: 1.1 }, name: 'x base' },
+      { type: 'scatter', mode: 'lines', x: simPert.t, y: simPert.x, line: { color: '#15803d', width: 1.5, dash: 'dash' }, name: `x pert (${eps >= 0 ? '+' : ''}${eps}%)` },
+      { type: 'scatter', mode: 'lines', x: simBase.t, y: simBase.y, line: { color: '#b91c1c', width: 1.1 }, name: 'y base' },
+      { type: 'scatter', mode: 'lines', x: simPert.t, y: simPert.y, line: { color: '#b91c1c', width: 1.5, dash: 'dash' }, name: 'y pert' }
+    ], {
+      title: { text: `Perturbación de ${PARAM_LABELS[param]} (${eps >= 0 ? '+' : ''}${eps}%)`, font: { size: 12.5 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 't', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE }
+    });
+    drawPlot('plot-pert-phase', [
+      { type: 'scatter', mode: 'lines', x: simBase.x, y: simBase.y, line: { color: '#1e40af', width: 1.1 }, name: 'órbita base' },
+      { type: 'scatter', mode: 'lines', x: simPert.x, y: simPert.y, line: { color: '#7c3aed', width: 1.5, dash: 'dash' }, name: 'órbita perturbada' }
+    ], {
+      title: { text: `T_sim: ${M0.T_sim.toFixed(2)} → ${isNaN(M1.T_sim) ? '—' : M1.T_sim.toFixed(2)}  ·  A_x: ${M0.A_x.toFixed(2)} → ${M1.A_x.toFixed(2)}`, font: { size: 12 }, x: 0.02 },
+      xaxis: { ...AXIS_STYLE, title: { text: 'x', font: { size: 11 } } },
+      yaxis: { ...AXIS_STYLE, title: { text: 'y', font: { size: 11 } } }
+    });
+    info.innerHTML =
+      `Base → perturbada: ` +
+      `x* ${M0.x_star.toFixed(3)} → <b>${M1.x_star.toFixed(3)}</b> · ` +
+      `y* ${M0.y_star.toFixed(3)} → <b>${M1.y_star.toFixed(3)}</b> · ` +
+      `T_sim ${M0.T_sim.toFixed(2)} → <b>${isNaN(M1.T_sim) ? '—' : M1.T_sim.toFixed(2)}</b> · ` +
+      `A_x ${M0.A_x.toFixed(2)} → <b>${M1.A_x.toFixed(2)}</b>`;
+  }
+  paramS.addEventListener('change', render);
+  epsS.addEventListener('input', render);
+  render();
+})();
+
+// ============================================================
+//  NAVEGACIÓN ACTIVA + KATEX
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderAllMath();
+  const sections = document.querySelectorAll('main section');
+  const navLinks = document.querySelectorAll('nav.toc a');
+  function onScroll() {
+    let current = '';
+    const y = window.scrollY + 100;
+    sections.forEach(s => { if (s.offsetTop <= y) current = s.id; });
+    navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+});
+window.addEventListener('load', renderAllMath);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interruptor Biológico (Toggle Switch) · Tutorial para estudiantes</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-light.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
+<style>
+:root {
+  --navy: #16324f;
+  --navy-light: #1e4767;
+  --red: #dc2626;
+  --green: #22a06b;
+  --amber: #f59e0b;
+  --purple: #7c3aed;
+  --blue: #2563eb;
+  --bg: #f8fafc;
+  --bg-alt: #ffffff;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --radius: 12px;
+  --radius-lg: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ====== HERO / HEADER ====== */
+.hero {
+  background: linear-gradient(135deg, #0b1f33 0%, #16324f 50%, #1e4767 100%);
+  color: #fff;
+  padding: 80px 32px 60px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(34,160,107,0.18) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(220,38,38,0.18) 0%, transparent 45%);
+  pointer-events: none;
+}
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.hero .badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+  margin: 0 0 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.hero p.subtitle {
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  max-width: 820px;
+  opacity: 0.92;
+  margin: 0 0 32px;
+  line-height: 1.7;
+}
+.hero .steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  max-width: 1000px;
+}
+.hero .step-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: #fff;
+  transition: background 0.2s, transform 0.2s;
+}
+.hero .step-pill:hover { background: rgba(255,255,255,0.16); transform: translateY(-2px); }
+.hero .step-pill .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  font-weight: 700;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ====== NAV STICKY ====== */
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.topnav .inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.topnav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.topnav a:hover { color: var(--navy); background: #eef2f7; }
+
+/* ====== CONTAINER ====== */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+section.chapter {
+  margin-bottom: 72px;
+  scroll-margin-top: 70px;
+}
+
+.chapter-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.chapter-header .chapter-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  margin-top: 2px;
+}
+.chapter-header h2 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+  line-height: 1.25;
+}
+.chapter-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0 0 24px 64px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+
+/* ====== CARDS ====== */
+.card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+.card h3 {
+  margin-top: 0;
+  color: var(--navy);
+  font-size: 1.15rem;
+}
+.card.tinted-blue { background: #f0f7ff; border-color: #bfdbfe; }
+.card.tinted-green { background: #f0fdf4; border-color: #bbf7d0; }
+.card.tinted-amber { background: #fffbeb; border-color: #fde68a; }
+.card.tinted-red { background: #fef2f2; border-color: #fecaca; }
+
+/* ====== CAJAS PEDAGÓGICAS ====== */
+.simple {
+  background: #f7f9fc;
+  border: 1px solid #dbe4f0;
+  border-left: 5px solid #1e40af;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 18px 22px;
+  margin: 18px 0;
+  font-size: 15.5px;
+}
+.simple .simple-head {
+  display: block; font-size: 11.5px; font-weight: 800;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #1e40af; margin-bottom: 8px;
+}
+.simple p { margin: 0 0 8px; }
+.simple p:last-child { margin-bottom: 0; }
+.simple ul { margin: 6px 0 0; padding-left: 1.25rem; }
+.simple ul li { margin-bottom: 6px; }
+
+.analogy {
+  background: #fdf9ee;
+  border: 1px solid #f0e0be;
+  border-left: 5px solid #b45309;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 18px 22px;
+  margin: 18px 0;
+  font-size: 15.5px;
+}
+.analogy .analogy-head {
+  display: block; font-size: 11.5px; font-weight: 800;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: #92400e; margin-bottom: 8px;
+}
+.analogy p { margin: 0 0 8px; }
+.analogy p:last-child { margin-bottom: 0; }
+
+/* ====== GRIDS ====== */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 800px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .chapter-sub { margin-left: 0; }
+}
+
+/* ====== CONTROLS ====== */
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.control label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.control label .value {
+  font-family: 'JetBrains Mono', 'Menlo', monospace;
+  font-size: 0.85rem;
+  color: var(--navy);
+  font-weight: 700;
+  background: #fff;
+  padding: 1px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: background 0.3s, transform 0.3s;
+}
+.control label .value.flash {
+  background: #fef08a;
+  transform: scale(1.15);
+}
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #cbd5e1;
+  border-radius: 3px;
+  outline: none;
+  transition: background 0.3s;
+}
+input[type="range"].flash { background: #fde68a; }
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--navy);
+  cursor: pointer;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--navy);
+  cursor: pointer;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+
+/* ====== BUTTONS ====== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  box-shadow: var(--shadow-sm);
+}
+.btn:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn:active { transform: translateY(0); }
+.btn.secondary { background: #e2e8f0; color: var(--navy); }
+.btn.secondary:hover { background: #cbd5e1; }
+.btn.danger { background: var(--red); }
+.btn.danger:hover { background: #b91c1c; }
+.btn.small { padding: 6px 12px; font-size: 0.82rem; }
+
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* ====== PLOT ====== */
+.plot {
+  width: 100%;
+  min-height: 380px;
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 4px;
+}
+
+/* ====== TABLES ====== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin: 12px 0;
+}
+th, td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: #f1f5f9;
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+tr:hover td { background: #f8fafc; }
+td.mono { font-family: 'JetBrains Mono', 'Menlo', monospace; color: var(--navy); font-weight: 600; }
+
+/* ====== KATEX ====== */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
+}
+.eq-box {
+  background: #f8fafc;
+  border-left: 4px solid var(--navy);
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 14px 0;
+}
+
+/* ====== CODE ====== */
+pre {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 18px 20px;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  font-family: 'JetBrains Mono', 'Menlo', monospace;
+}
+code { font-family: 'JetBrains Mono', 'Menlo', monospace; }
+
+/* ====== NETWORK SVG ====== */
+.network-svg-container {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ====== FIXED POINT BADGE ====== */
+.fp-list { list-style: none; padding: 0; margin: 12px 0; }
+.fp-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', 'Menlo', monospace;
+  font-size: 0.88rem;
+}
+.fp-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.9);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+.fp-dot.stable { background: var(--green); }
+.fp-dot.saddle { background: var(--amber); }
+.fp-dot.unstable { background: var(--red); }
+
+/* ====== DIAGNOSTIC BOX ====== */
+.diagnostic {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  font-family: 'JetBrains Mono', 'Menlo', monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  color: var(--text);
+}
+.diagnostic.ok { border-left: 5px solid var(--green); background: #f0fdf4; }
+.diagnostic.warn { border-left: 5px solid var(--amber); background: #fffbeb; }
+.diagnostic.err { border-left: 5px solid var(--red); background: #fef2f2; }
+
+/* ====== FOOTER ====== */
+footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.75);
+  padding: 40px 32px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+footer a { color: #fff; text-decoration: none; font-weight: 600; }
+footer a:hover { text-decoration: underline; }
+
+/* ====== MISC ====== */
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.pill.green { background: #dcfce7; color: #166534; }
+.pill.red { background: #fee2e2; color: #991b1b; }
+.pill.amber { background: #fef3c7; color: #92400e; }
+.pill.blue { background: #dbeafe; color: #1e40af; }
+.pill.purple { background: #ede9fe; color: #6d28d9; }
+
+.highlight {
+  background: linear-gradient(180deg, transparent 60%, #fef08a 60%);
+  padding: 0 2px;
+  font-weight: 600;
+}
+
+.callout {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  margin: 16px 0;
+  font-size: 0.92rem;
+}
+.callout.info { background: #eff6ff; border-left: 4px solid var(--blue); }
+.callout.success { background: #f0fdf4; border-left: 4px solid var(--green); }
+.callout.warn { background: #fffbeb; border-left: 4px solid var(--amber); }
+.callout.danger { background: #fef2f2; border-left: 4px solid var(--red); }
+.callout .icon { font-size: 1.2rem; flex-shrink: 0; }
+.callout p { margin: 0; }
+
+ul.checks { list-style: none; padding: 0; }
+ul.checks li { padding: 6px 0 6px 28px; position: relative; }
+ul.checks li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  color: var(--green);
+  font-weight: 700;
+}
+
+.legend-inline {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.legend-inline .item { display: flex; align-items: center; gap: 6px; }
+.legend-inline .dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+/* ====== FLASH HIGHLIGHT en sección robust ====== */
+@keyframes cardFlash {
+  0%   { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+  30%  { box-shadow: 0 0 0 6px rgba(124,58,237,0.35); }
+  100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+}
+.card.flash { animation: cardFlash 1.6s ease-out; }
+
+/* ====== TOAST NOTIFICATION ====== */
+#toastContainer {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  min-width: 280px;
+  max-width: 380px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  box-shadow: 0 12px 32px rgba(15,23,42,0.18);
+  border-left: 5px solid var(--purple);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--text);
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+  pointer-events: auto;
+}
+.toast.show { transform: translateX(0); opacity: 1; }
+.toast .toast-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.toast .toast-title {
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+.toast .toast-msg {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+}
+.toast.success { border-left-color: var(--green); }
+.toast.info    { border-left-color: var(--blue); }
+.toast.warn    { border-left-color: var(--amber); }
+</style>
+</head>
+<body>
+
+<!-- ========== TOAST ========== -->
+<div id="toastContainer"></div>
+
+<!-- ========== HERO ========== -->
+<header class="hero">
+  <div class="hero-content">
+    <span class="badge">Cuaderno Interactivo · Biología de Sistemas</span>
+    <h1>El Interruptor Biológico: Cómo Dos Proteínas Deciden el Destino de una Célula</h1>
+    <p class="subtitle">
+      J. Alexander Garcia Zea: PhD en Biología Fundamental y de Sistemas. MSc en Genética y Evolución.
+      En este cuaderno construimos, paso a paso y desde cero, un modelo matemático de un
+      <strong>interruptor biológico</strong> (un <em>toggle switch</em>): una red de dos proteínas que
+      se apagan mutuamente y que puede tener <strong>dos estados estables</strong> — como un interruptor
+      de luz que recuerda su última posición.
+    </p>
+    <div class="steps-grid">
+      <a href="#paso1" class="step-pill"><span class="num">1</span> La red visual</a>
+      <a href="#paso2" class="step-pill"><span class="num">2</span> Ecuaciones</a>
+      <a href="#paso3" class="step-pill"><span class="num">3</span> Conservación</a>
+      <a href="#paso4" class="step-pill"><span class="num">4</span> Parámetros</a>
+      <a href="#paso5" class="step-pill"><span class="num">5</span> Equilibrio</a>
+      <a href="#paso6" class="step-pill"><span class="num">6</span> Simulación</a>
+      <a href="#paso7" class="step-pill"><span class="num">7</span> Ajuste</a>
+      <a href="#paso8" class="step-pill"><span class="num">8</span> Robustez</a>
+    </div>
+  </div>
+</header>
+
+<!-- ========== TOP NAV ========== -->
+<nav class="topnav">
+  <div class="inner">
+    <a href="#paso1">① La red</a>
+    <a href="#paso2">② Ecuaciones</a>
+    <a href="#paso3">③ Conservación</a>
+    <a href="#paso4">④ Parámetros</a>
+    <a href="#paso5">⑤ Equilibrio</a>
+    <a href="#paso6">⑥ Simulación</a>
+    <a href="#paso7">⑦ Ajuste</a>
+    <a href="#paso8">⑧ Robustez</a>
+    <a href="#experimento">🔬 Experimento</a>
+    <a href="#conclusiones">📌 Conclusiones</a>
+  </div>
+</nav>
+
+<main class="container">
+
+<!-- ============================================================
+     PASO 1 — RED VISUAL
+     ============================================================ -->
+<section class="chapter" id="paso1">
+  <div class="chapter-header">
+    <span class="chapter-num">1</span>
+    <h2>La Red: un Mapa Visual del Sistema</h2>
+  </div>
+  <p class="chapter-sub">Antes de escribir ecuaciones, dibujemos quién hace qué</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>Imagina dos proteínas, <strong>X₁</strong> e <strong>Y₁</strong>, que no se llevan bien: cada una intenta apagar a la otra. Si X₁ sube mucho, apaga a Y₁. Si Y₁ sube mucho, apaga a X₁. Eso significa que <strong>no pueden estar ambas activas al mismo tiempo</strong>: una gana y la otra pierde. A esta arquitectura se le llama <em>toggle switch</em> (interruptor biológico), y es uno de los motivos más importantes en biología porque permite a las células <strong>tomar decisiones</strong> y <strong>recordar</strong> cuál tomaron.</p>
+  </div>
+
+  <div class="card">
+    <h3>Arquitectura del sistema</h3>
+    <p>La red tiene <strong>dos módulos acoplados</strong>. Cada módulo tiene una versión inactiva (X₂, Y₂) y una versión activa (X₁, Y₁):</p>
+
+    <div class="grid-2" style="margin-top: 16px;">
+      <div class="card tinted-red" style="margin: 0;">
+        <h3 style="color: var(--red);">Módulo X</h3>
+        <ul style="margin: 0; padding-left: 20px;">
+          <li><b>X₂ → X₁</b>: el precursor X₂ se activa, con velocidad base α₁.</li>
+          <li><b>X₁ → X₂</b>: la forma activa se desactiva, con velocidad β₁. Esta desactivación es <b>acelerada por Y₁</b> (respuesta sigmoidal tipo Hill).</li>
+        </ul>
+      </div>
+      <div class="card tinted-blue" style="margin: 0;">
+        <h3 style="color: var(--blue);">Módulo Y</h3>
+        <ul style="margin: 0; padding-left: 20px;">
+          <li><b>Y₂ → Y₁</b>: el precursor Y₂ se activa, con velocidad base α₂.</li>
+          <li><b>Y₁ → Y₂</b>: la forma activa se desactiva, con velocidad β₂. Esta desactivación es <b>acelerada por X₁</b> (Hill).</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 24px;">El acoplamiento cruzado (la clave de todo)</h3>
+    <ul>
+      <li>Y₁ <b>inhibe</b> a X₁ (le dice: "desactívate").</li>
+      <li>X₁ <b>inhibe</b> a Y₁ (le dice: "desactívate").</li>
+    </ul>
+    <p>Esto produce una <span class="highlight">doble retroalimentación positiva</span>: cuando una baja, la otra sube. El sistema tiene <b>dos estados estables alternativos</b>.</p>
+  </div>
+
+  <div class="analogy">
+    <span class="analogy-head">🔍 Analogía: el duelo de dos vecinos</span>
+    <p>Imagina dos vecinos que, cada vez que uno pone música alta, el otro llama a la policía. Nunca pueden tener los dos la música alta al mismo tiempo. Si uno empieza fuerte, el otro se silencia. Y una vez que uno se silenció, le cuesta volver a empezar.</p>
+    <p>Eso es lo que hace este interruptor biológico: <strong>el que sube primero le quita el turno al otro</strong>. Y una vez establecido, es difícil darle la vuelta.</p>
+  </div>
+
+  <div class="card tinted-blue">
+    <h3>Moduladores externos (EC)</h3>
+    <p>Los cuadros <em>EC</em> (External Conditions) representan <strong>factores externos</strong> que ajustan los parámetros: por ejemplo, una hormona o un nutriente puede hacer que el acoplamiento entre X₁ e Y₁ sea más fuerte o más débil. Al parámetro que mide esa "fuerza del acoplamiento" lo llamamos <b>ν</b>, y jugará un papel protagónico en el Paso 8.</p>
+  </div>
+
+  <div class="network-svg-container">
+    <div class="diagram-wrap">
+      <img src="ima3.png" alt="Diagrama de la red de reacciones del toggle switch" style="display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px;">
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="icon">ℹ</div>
+    <p><b>Idea clave:</b> el dibujo que acabas de ver <em>contiene toda la información</em> que necesitaremos después. Cada flecha se convertirá en un término de las ecuaciones del Paso 2.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PASO 2 — MODELO MATEMÁTICO
+     ============================================================ -->
+<section class="chapter" id="paso2">
+  <div class="chapter-header">
+    <span class="chapter-num">2</span>
+    <h2>Las Ecuaciones: de Flechas a Fórmulas</h2>
+  </div>
+  <p class="chapter-sub">Traducimos el dibujo del Paso 1 al lenguaje de las EDOs</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>Cada flecha del diagrama se convierte en un <strong>término matemático</strong>. Los procesos simples (activación, desactivación) dan términos <strong>lineales</strong>. Los procesos regulados (Hill) dan términos <strong>sigmoidales</strong>, que son clave para la biestabilidad. Juntando todo obtenemos un sistema de 4 ecuaciones diferenciales.</p>
+  </div>
+
+  <div class="card">
+    <h3>Ley de acción de masas + cinética de Hill</h3>
+
+    <h3>Términos de reacción</h3>
+    <p><b>Producción de X₁</b> (proporcional a su precursor):</p>
+    <div class="eq-box">$$v_{\text{prod}}^{(X)} = \alpha_1 \, X_2$$</div>
+
+    <p><b>Degradación de X₁, acelerada por Y₁</b> (función sigmoidal tipo Hill):</p>
+    <div class="eq-box">$$v_{\text{deg}}^{(X)} = \frac{\beta_1 \, X_1 \, (\nu Y_1)^{\gamma_1}}{K_1 + (\nu Y_1)^{\gamma_1}}$$</div>
+
+    <p><b>Producción de Y₁</b>:</p>
+    <div class="eq-box">$$v_{\text{prod}}^{(Y)} = \alpha_2 \, Y_2$$</div>
+
+    <p><b>Degradación de Y₁, acelerada por X₁</b>:</p>
+    <div class="eq-box">$$v_{\text{deg}}^{(Y)} = \frac{\beta_2 \, Y_1 \, X_1^{\gamma_2}}{K_2 + X_1^{\gamma_2}}$$</div>
+  </div>
+
+  <div class="analogy">
+    <span class="analogy-head">🔍 Analogía: la función sigmoidal</span>
+    <p>Una función sigmoidal es como un interruptor graduado. Si Y₁ es poquita, la degradación de X₁ es casi nula (el interruptor está apagado). Si Y₁ sube lo suficiente, la degradación se dispara de golpe (el interruptor se enciende). El exponente de Hill γ controla <em>qué tan brusco</em> es ese encendido:</p>
+    <ul style="margin: 6px 0 0; padding-left: 1.25rem;">
+      <li><b>γ = 1</b>: respuesta suave y proporcional (casi lineal).</li>
+      <li><b>γ grande</b>: respuesta casi de "todo o nada", muy cooperativa.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Sistema completo de EDOs (4 dimensiones)</h3>
+    <p>Juntando los cuatro términos para las cuatro variables:</p>
+    <div class="eq-box">
+    $$\begin{aligned}
+    \dot{X}_1 &= \alpha_1 X_2 - \frac{\beta_1 X_1 (\nu Y_1)^{\gamma_1}}{K_1 + (\nu Y_1)^{\gamma_1}} \\[4pt]
+    \dot{X}_2 &= -\alpha_1 X_2 + \frac{\beta_1 X_1 (\nu Y_1)^{\gamma_1}}{K_1 + (\nu Y_1)^{\gamma_1}} \\[4pt]
+    \dot{Y}_1 &= \alpha_2 Y_2 - \frac{\beta_2 Y_1 X_1^{\gamma_2}}{K_2 + X_1^{\gamma_2}} \\[4pt]
+    \dot{Y}_2 &= -\alpha_2 Y_2 + \frac{\beta_2 Y_1 X_1^{\gamma_2}}{K_2 + X_1^{\gamma_2}}
+    \end{aligned}$$
+    </div>
+  </div>
+
+  <div class="card tinted-blue">
+    <h3>¿Qué significa cada parámetro?</h3>
+    <ul>
+      <li><b>α₁, α₂</b>: velocidad "natural" con la que cada precursor se activa solo (sin ayuda del otro).</li>
+      <li><b>β₁, β₂</b>: la velocidad <em>máxima</em> a la que el otro puede acelerar la desactivación.</li>
+      <li><b>K₁, K₂</b>: la "sensibilidad" del interruptor: qué concentración del modulador necesita para empezar a hacer efecto.</li>
+      <li><b>γ₁, γ₂</b>: el exponente de Hill. Si es grande, el sistema responde como un interruptor brusco (todo o nada). Es la clave de la biestabilidad.</li>
+      <li><b>ν</b>: la "fuerza" del acoplamiento Y₁ → X₁. Lo vamos a usar como parámetro de control en el análisis de bifurcación.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     PASO 3 — CONSERVACIÓN
+     ============================================================ -->
+<section class="chapter" id="paso3">
+  <div class="chapter-header">
+    <span class="chapter-num">3</span>
+    <h2>Atajo por Conservación: de 4 ecuaciones a 2</h2>
+  </div>
+  <p class="chapter-sub">Una regla matemática que simplifica muchísimo el problema</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>En este modelo, el precursor X₂ <strong>solo se convierte</strong> en X₁ y viceversa: no se crea ni se destruye nada. Eso significa que <strong>la suma X₁ + X₂ es siempre constante</strong>. Lo mismo pasa con Y₁ + Y₂. Si sabemos cuánto vale X₁, automáticamente sabemos cuánto vale X₂. ¡No hace falta simular las dos! Ese truco nos deja con la mitad de ecuaciones.</p>
+  </div>
+
+  <div class="card">
+    <h3>Derivación</h3>
+    <p>Como no hay síntesis <em>de novo</em> ni degradación total de las proteínas (solo conversión entre formas), las cantidades totales se conservan:</p>
+    <div class="eq-box">$$X_1(t) + X_2(t) = C_X = \text{constante}$$</div>
+    <div class="eq-box">$$Y_1(t) + Y_2(t) = C_Y = \text{constante}$$</div>
+
+    <p><b>Normalización:</b> sin pérdida de generalidad, tomamos C<sub>X</sub> = C<sub>Y</sub> = 1 (es decir, medimos las concentraciones como fracción del total):</p>
+    <div class="eq-box">$$X_1 + X_2 = 1 \quad\Longrightarrow\quad X_2 = 1 - X_1$$</div>
+    <div class="eq-box">$$Y_1 + Y_2 = 1 \quad\Longrightarrow\quad Y_2 = 1 - Y_1$$</div>
+
+    <h3>Verificación algebraica</h3>
+    <p>Si sumamos las dos primeras ecuaciones del sistema 4D, todo se cancela:</p>
+    <div class="eq-box">
+    $$\frac{d(X_1 + X_2)}{dt} = \dot{X}_1 + \dot{X}_2 = \left[\alpha_1 X_2 - v_{\text{deg}}^{(X)}\right] + \left[v_{\text{deg}}^{(X)} - \alpha_1 X_2\right] = 0 \;\checkmark$$
+    </div>
+  </div>
+
+  <div class="card tinted-green">
+    <h3>Sistema reducido (2 dimensiones)</h3>
+    <p>Sustituyendo X₂ = 1 − x₁ e Y₂ = 1 − y₁, el sistema se reduce a:</p>
+    <div class="eq-box" style="background: #fff;">
+    $$\boxed{\;\dot{x}_1 = \alpha_1 (1 - x_1) - \frac{\beta_1 \, x_1 (\nu y_1)^{\gamma_1}}{K_1 + (\nu y_1)^{\gamma_1}}\;}$$
+    </div>
+    <div class="eq-box" style="background: #fff;">
+    $$\boxed{\;\dot{y}_1 = \alpha_2 (1 - y_1) - \frac{\beta_2 \, y_1 \, x_1^{\gamma_2}}{K_2 + x_1^{\gamma_2}}\;}$$
+    </div>
+    <p><b>Ventaja computacional:</b> pasamos de 4 EDOs a 2. Esto acelera el análisis numérico y hace mucho más fácil visualizar el espacio de fases. Y sin perder nada de información.</p>
+  </div>
+
+  <div class="callout success">
+    <div class="icon">✓</div>
+    <p><b>Por qué esto importa:</b> de aquí en adelante trabajaremos solo con <b>x₁(t)</b> y <b>y₁(t)</b>. Las variables X₂ e Y₂ se calculan automáticamente como 1 − x₁ y 1 − y₁.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PASO 4 — PARÁMETROS
+     ============================================================ -->
+<section class="chapter" id="paso4">
+  <div class="chapter-header">
+    <span class="chapter-num">4</span>
+    <h2>Parámetros: las Perillas que Podemos Girar</h2>
+  </div>
+  <p class="chapter-sub">Qué podemos cambiar, qué queremos reproducir, y cómo explorarlo</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>Los <strong>parámetros</strong> son números que definen el comportamiento del modelo (como las perillas de una mezcladora de sonido). Los <strong>estados</strong> son las variables que cambian con el tiempo (x₁ e y₁). En biología, los parámetros dependen del tipo de célula, las condiciones ambientales, etc. Aquí los vamos a mover libremente para ver qué pasa.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Condiciones iniciales</h3>
+      <p>Las concentraciones iniciales de las formas activas:</p>
+      <div class="eq-box">$$x_1(0), \; y_1(0) \in [0, 1]$$</div>
+      <p>El 0 significa "ninguna proteína activa" y el 1 significa "todas activas".</p>
+    </div>
+    <div class="card tinted-amber">
+      <h3>Comportamientos que queremos ver</h3>
+      <ol style="margin: 0; padding-left: 20px;">
+        <li><b>Biestabilidad</b>: dos atractores coexisten con los mismos parámetros.</li>
+        <li><b>Dependencia del pasado</b>: el estado final depende de dónde empezó (histéresis).</li>
+        <li><b>Transiciones</b>: al cambiar ν, el sistema pasa de monostable a biestable y viceversa.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Tabla de parámetros</h3>
+    <table>
+      <thead>
+        <tr><th>Símbolo</th><th>Qué controla</th><th>Rango explorado</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">α₁, α₂</td><td>Velocidad de activación basal</td><td>0.1 – 2.0</td></tr>
+        <tr><td class="mono">β₁, β₂</td><td>Velocidad máxima de desactivación</td><td>0.5 – 10</td></tr>
+        <tr><td class="mono">K₁, K₂</td><td>Sensibilidad del interruptor (Hill)</td><td>0.05 – 1.0</td></tr>
+        <tr><td class="mono">γ₁, γ₂</td><td>Cooperatividad (brusquedad del interruptor)</td><td>1 – 8</td></tr>
+        <tr><td class="mono">ν</td><td>Fuerza del acoplamiento Y₁ → X₁</td><td>0.1 – 3.0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🔧 Explorador interactivo</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Mueve los deslizadores y mira en tiempo real cómo cambian la <strong>dinámica temporal</strong>
+      (izquierda) y el <strong>plano de fase</strong> (derecha). Los puntos de color indican los estados
+      estables: <span style="color:#22a06b; font-weight:700;">verde = estable</span>,
+      <span style="color:#f59e0b; font-weight:700;">ámbar = silla</span> (inestable pero no inestable del todo, es un punto de "paso").
+    </p>
+    <div class="controls">
+      <div class="control">
+        <label>α₁ (activación de X) <span class="value" id="lbl-alpha1">0.50</span></label>
+        <input type="range" id="alpha1" min="0.1" max="2" step="0.05" value="0.5">
+      </div>
+      <div class="control">
+        <label>α₂ (activación de Y) <span class="value" id="lbl-alpha2">0.50</span></label>
+        <input type="range" id="alpha2" min="0.1" max="2" step="0.05" value="0.5">
+      </div>
+      <div class="control">
+        <label>β₁ (desactivación de X) <span class="value" id="lbl-beta1">5.00</span></label>
+        <input type="range" id="beta1" min="0.5" max="10" step="0.1" value="5.0">
+      </div>
+      <div class="control">
+        <label>β₂ (desactivación de Y) <span class="value" id="lbl-beta2">5.00</span></label>
+        <input type="range" id="beta2" min="0.5" max="10" step="0.1" value="5.0">
+      </div>
+      <div class="control">
+        <label>K₁ (sensibilidad X) <span class="value" id="lbl-K1">0.50</span></label>
+        <input type="range" id="K1" min="0.05" max="1.0" step="0.05" value="0.5">
+      </div>
+      <div class="control">
+        <label>K₂ (sensibilidad Y) <span class="value" id="lbl-K2">0.50</span></label>
+        <input type="range" id="K2" min="0.05" max="1.0" step="0.05" value="0.5">
+      </div>
+      <div class="control">
+        <label>γ₁ (cooperatividad X) <span class="value" id="lbl-gamma1">4.0</span></label>
+        <input type="range" id="gamma1" min="1" max="8" step="0.5" value="4">
+      </div>
+      <div class="control">
+        <label>γ₂ (cooperatividad Y) <span class="value" id="lbl-gamma2">4.0</span></label>
+        <input type="range" id="gamma2" min="1" max="8" step="0.5" value="4">
+      </div>
+      <div class="control">
+        <label>ν (fuerza del acoplamiento) <span class="value" id="lbl-v">1.00</span></label>
+        <input type="range" id="v" min="0.1" max="3.0" step="0.05" value="1.0">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn secondary small" onclick="resetParams()">↺ Resetear parámetros</button>
+      <button class="btn secondary small" onclick="loadBistable()">⚙ Configuración biestable</button>
+      <button class="btn secondary small" onclick="loadMonostable()">⚙ Configuración monostable</button>
+    </div>
+
+    <div class="grid-2">
+      <div id="plotExplorerTime" class="plot"></div>
+      <div id="plotExplorerPhase" class="plot"></div>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <span class="analogy-head">🔍 Analogía: las perillas de un mezclador</span>
+    <p>Piensa en una mesa de mezclas de DJ. Cada parámetro es una perilla que controla un aspecto del sonido: α controla el "volumen" del proceso de activación, β el de la desactivación, γ el de la brusquedad del interruptor, ν el de la fuerza con que un módulo afecta al otro. Mover las perillas cambia completamente la música.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PASO 5 — ESTADO ESTACIONARIO
+     ============================================================ -->
+<section class="chapter" id="paso5">
+  <div class="chapter-header">
+    <span class="chapter-num">5</span>
+    <h2>Estados de Equilibrio: ¿Dónde se Queda el Sistema?</h2>
+  </div>
+  <p class="chapter-sub">Los puntos donde el sistema "se detiene" y cómo saber si son estables</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>Un <strong>estado de equilibrio</strong> es una combinación (x₁, y₁) en la que el sistema deja de moverse: las derivadas se anulan. La pregunta importante es: si me acerco un poquito a ese estado, ¿el sistema <em>vuelve</em> a él (estable) o <em>se aleja</em> (inestable)?</p>
+    <p>Usamos dos herramientas para responder:</p>
+    <ul>
+      <li>Las <strong>nullclines</strong>: curvas donde una de las dos derivadas se anula.</li>
+      <li>El <strong>Jacobiano</strong>: una matriz que nos dice, para cada punto de equilibrio, si es estable, inestable o silla.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Ecuaciones de equilibrio</h3>
+    <p>En el estado estacionario, ẋ₁ = ẏ₁ = 0. Esto nos da dos ecuaciones algebraicas no lineales:</p>
+    <div class="eq-box">
+    $$\alpha_1 (1 - x_1^*) = \frac{\beta_1 \, x_1^* (\nu y_1^*)^{\gamma_1}}{K_1 + (\nu y_1^*)^{\gamma_1}} \quad (N_X)$$
+    </div>
+    <div class="eq-box">
+    $$\alpha_2 (1 - y_1^*) = \frac{\beta_2 \, y_1^* (x_1^*)^{\gamma_2}}{K_2 + (x_1^*)^{\gamma_2}} \quad (N_Y)$$
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Nullclines: las "carreteras" del plano de fase</h3>
+    <p>Cada ecuación define una <strong>curva</strong> en el plano (x₁, y₁). A esas curvas las llamamos <strong>nullclines</strong>:</p>
+    <ul>
+      <li><b>Nullcline X</b>: dónde ẋ₁ = 0. Despejando y₁ como función de x₁:</li>
+    </ul>
+    <div class="eq-box">
+    $$y_1^{(X)}(x_1) = \frac{1}{\nu}\left[\frac{K_1 \, \alpha_1 (1 - x_1)}{\beta_1 x_1 - \alpha_1 (1 - x_1)}\right]^{1/\gamma_1}$$
+    </div>
+    <ul>
+      <li><b>Nullcline Y</b>: dónde ẏ₁ = 0. Despejando y₁:</li>
+    </ul>
+    <div class="eq-box">
+    $$y_1^{(Y)}(x_1) = \frac{\alpha_2}{\alpha_2 + \frac{\beta_2 x_1^{\gamma_2}}{K_2 + x_1^{\gamma_2}}}$$
+    </div>
+
+    <div class="callout info">
+      <div class="icon">ℹ</div>
+      <p><b>¿Para qué sirven?</b> Los puntos donde las dos nullclines se <strong>cruzan</strong> son los estados de equilibrio. Y ver cuántas veces se cruzan (una o tres) nos dice si el sistema es <b>monostable</b> o <b>biestable</b>.</p>
+    </div>
+  </div>
+
+  <div class="card tinted-amber">
+    <h3>El Jacobiano y la estabilidad</h3>
+    <p>El Jacobiano es una matriz de derivadas parciales que nos dice cómo responde el sistema a pequeñas perturbaciones en cada punto fijo:</p>
+    <div class="eq-box" style="background: #fff;">
+    $$J = \begin{pmatrix} \dfrac{\partial \dot{x}_1}{\partial x_1} & \dfrac{\partial \dot{x}_1}{\partial y_1} \\[6pt] \dfrac{\partial \dot{y}_1}{\partial x_1} & \dfrac{\partial \dot{y}_1}{\partial y_1} \end{pmatrix}$$
+    </div>
+    <p>A partir de la <strong>traza</strong> y el <strong>determinante</strong> de J:</p>
+    <ul>
+      <li><b>tr(J) &lt; 0 y det(J) &gt; 0</b> → punto <span class="pill green">estable</span> (atractor).</li>
+      <li><b>det(J) &lt; 0</b> → punto <span class="pill amber">silla</span> (atrae en una dirección y repele en la otra).</li>
+      <li><b>tr(J) &gt; 0 y det(J) &gt; 0</b> → punto <span class="pill red">inestable</span> (repulsor).</li>
+    </ul>
+    <p>Si existen <b>dos atractores estables</b> con los mismos parámetros, el sistema es <b>biestable</b>.</p>
+  </div>
+
+  <div class="card">
+    <h3>🔍 Puntos fijos del modelo por defecto (ν = 1.0)</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Se buscan numéricamente todas las soluciones del sistema algebraico no lineal y se clasifican con el Jacobiano.</p>
+
+    <div class="legend-inline">
+      <div class="item"><span class="dot" style="background: var(--green);"></span> Estable (atractor)</div>
+      <div class="item"><span class="dot" style="background: var(--amber);"></span> Silla</div>
+      <div class="item"><span class="dot" style="background: var(--red);"></span> Inestable</div>
+    </div>
+
+    <ul class="fp-list" id="fixedPointsList"></ul>
+
+    <div class="callout success">
+      <div class="icon">✓</div>
+      <p><b>Resultado:</b> aparecen <b>dos puntos estables</b> (uno con X₁ alto y otro con X₁ bajo) y una silla entre ellos. <b>El sistema es biestable</b>.</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <span class="analogy-head">🔍 Analogía: un paisaje con dos valles</span>
+    <p>Imagina un paisaje con <strong>dos valles</strong> separados por una <strong>colina</strong>. Los valles son los dos atractores (estados estables); la cima de la colina es la silla. Si dejas una pelota en la ladera, rueda hacia uno de los dos valles. Cuál valle es, depende de dónde la dejaste.</p>
+    <p>En nuestro sistema, "dónde la dejas" es la condición inicial (x₁(0), y₁(0)). Y "hacia dónde rueda" es el atractor final.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PASO 6 — SIMULACIÓN DINÁMICA
+     ============================================================ -->
+<section class="chapter" id="paso6">
+  <div class="chapter-header">
+    <span class="chapter-num">6</span>
+    <h2>Simulación: Dejemos Correr el Sistema</h2>
+  </div>
+  <p class="chapter-sub">Cómo resolver numéricamente las ecuaciones y ver el resultado</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>Las ecuaciones diferenciales no tienen una solución "de papel y lápiz" sencilla. Entonces las resolvemos <strong>numéricamente</strong>, avanzando paso a paso en el tiempo. Usamos el método de <strong>Runge–Kutta de orden 4</strong> (RK4), que es muy preciso. La idea es: en cada instante, calculamos cómo cambiarían x₁ e y₁, y damos un pasito hacia adelante.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Método numérico</h3>
+      <p>RK4 con paso <em>h = 0.01</em>:</p>
+      <ul>
+        <li>Precisión de orden 4: el error disminuye muy rápido al reducir el paso.</li>
+        <li>Adecuado para sistemas suaves como el nuestro.</li>
+      </ul>
+    </div>
+    <div class="card tinted-blue">
+      <h3>Prueba clave</h3>
+      <p>Simulamos desde <strong>dos condiciones iniciales distintas</strong>:</p>
+      <ul>
+        <li><b>(x₁(0), y₁(0)) = (0, 0)</b> — arrancamos con Y₁ casi activa.</li>
+        <li><b>(x₁(0), y₁(0)) = (0, 0.9)</b> — arrancamos con X₁ casi activa.</li>
+      </ul>
+      <p>Si ambas terminan en puntos diferentes, hay biestabilidad.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📈 Reproducción interactiva (Figura 3)</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      A la izquierda: dinámica temporal de y₁(t) desde dos condiciones iniciales.
+      A la derecha: diagrama de fase con el campo de direcciones, las nullclines y las trayectorias.
+      Mueve ν para ver cómo cambia todo.
+    </p>
+
+    <div class="controls" style="grid-template-columns: 1fr;">
+      <div class="control">
+        <label>ν (fuerza del acoplamiento) <span class="value" id="lbl-fig3-v">1.00</span></label>
+        <input type="range" id="fig3v" min="0.1" max="3.0" step="0.05" value="1.0">
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div id="plotFig3Time" class="plot"></div>
+      <div id="plotFig3Phase" class="plot"></div>
+    </div>
+
+    <div class="simple" style="margin-top: 20px;">
+      <span class="simple-head">💡 Qué observar</span>
+      <ul>
+        <li>Cuando las dos curvas terminan en <b>niveles distintos</b>, estamos viendo biestabilidad en acción: dos futuros posibles para la misma ν.</li>
+        <li>Cuando las dos curvas terminan en el <b>mismo nivel</b>, el sistema es monostable: hay un solo destino.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 Mismo estado inicial, distintas ν</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      Todas las trayectorias parten de y₁(0) = 0.9. Lo único que cambia es ν. Observa cómo algunos valores llegan arriba, otros abajo, y otros quedan en un punto intermedio.
+    </p>
+    <div id="plotMultiNu" class="plot" style="min-height: 420px;"></div>
+
+    <div class="analogy">
+      <span class="analogy-head">🔍 Analogía: empujar una pelota cuesta arriba</span>
+      <p>ν es como la "fuerza" con que empujas una pelota colina arriba. Si empujas suavecito (ν pequeño), la pelota se queda en el valle donde estaba. Si empujas muy fuerte (ν grande), puede que la pelota cruce la colina y se vaya al otro valle. En el punto medio hay una región de biestabilidad donde <em>depende de la historia</em>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PASO 7 — OPTIMIZACIÓN
+     ============================================================ -->
+<section class="chapter" id="paso7">
+  <div class="chapter-header">
+    <span class="chapter-num">7</span>
+    <h2>Ajuste de Parámetros: Encontrar el Modelo que Mejor Explica los Datos</h2>
+  </div>
+  <p class="chapter-sub">El paso que conecta el modelo abstracto con datos reales (o sintéticos)</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>En la vida real, no conocemos los parámetros de antemano: hay que <strong>estimarlos a partir de datos experimentales</strong>. La idea es simple: probamos distintos valores de los parámetros y nos quedamos con el que hace que las curvas del modelo se parezcan más a los datos. A esa diferencia entre modelo y datos la llamamos <strong>error (SSE)</strong>, y queremos minimizarlo.</p>
+  </div>
+
+  <div class="card">
+    <h3>La matemática del ajuste</h3>
+    <p>Buscamos el vector de parámetros θ* que minimiza el error cuadrático:</p>
+    <div class="eq-box">
+    $$\theta^* = \arg\min_{\theta} \; \text{SSE}(\theta) = \arg\min_{\theta} \sum_{i=1}^{N} \left( y_i^{\text{exp}} - y_i^{\text{model}}(\theta) \right)^2$$
+    </div>
+
+    <h3>Estrategia de este cuaderno</h3>
+    <ol>
+      <li><b>Generamos datos sintéticos</b>: simulamos con parámetros "verdaderos" (ν_true = 1.0) y añadimos ruido gaussiano, como si fueran datos de laboratorio.</li>
+      <li><b>Fijamos todos los parámetros excepto ν</b>, para ver el paisaje de error en una sola dimensión (más fácil de visualizar).</li>
+      <li><b>Movemos ν</b> y miramos cómo cambia el SSE.</li>
+    </ol>
+
+    <div class="callout info">
+      <div class="icon">ℹ</div>
+      <p>En un problema real se usaría un optimizador automático (Levenberg-Marquardt) con todos los parámetros a la vez. Aquí priorizamos la <b>intuición visual</b>: tú mueves el slider a mano y ves cómo baja el SSE.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎯 Ajuste interactivo: encuentra el ν correcto</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      Los <strong>puntos rojos</strong> son datos sintéticos (generados con ν_true = 1.0 + ruido gaussiano, σ = 0.03).
+      Mueve ν para que la curva azul del modelo pase lo más cerca posible de los puntos.
+    </p>
+
+    <div class="controls">
+      <div class="control">
+        <label>ν (tu estimación) <span class="value" id="lbl-optim-v">0.50</span></label>
+        <input type="range" id="optimv" min="0.1" max="3.0" step="0.05" value="0.5">
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div id="plotOptimFit" class="plot"></div>
+      <div id="plotOptimSSE" class="plot"></div>
+    </div>
+
+    <div class="callout success" id="optimVerdict">
+      <div class="icon">🎯</div>
+      <p id="optimVerdictText">Ajusta el slider para encontrar el mínimo del SSE.</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    <span class="analogy-head">🔍 Analogía: afinar una radio</span>
+    <p>Ajustar ν es como afinar una radio: giras la perilla hasta que la señal se escucha clara. Si giras demasiado, vuelves a perder la señal. El gráfico de la derecha (SSE vs ν) es como el indicador de "cuán limpia" está la señal: tiene un <strong>mínimo</strong> en ν ≈ 1.0, que es el valor correcto.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     PASO 8 — ROBUSTEZ
+     ============================================================ -->
+<section class="chapter" id="paso8">
+  <div class="chapter-header">
+    <span class="chapter-num">8</span>
+    <h2>Robustez: ¿Qué Tan Sensible es el Sistema a los Cambios?</h2>
+  </div>
+  <p class="chapter-sub">El análisis más importante para aplicaciones biológicas reales</p>
+
+  <div class="simple">
+    <span class="simple-head">💡 En palabras simples</span>
+    <p>Una pregunta crítica en biología: si cambiamos <strong>un poquito</strong> un parámetro (por ejemplo, ν), ¿cambia mucho el comportamiento? Si no cambia mucho, decimos que el sistema es <strong>robusto</strong>. Si cambia drásticamente, decimos que es <strong>sensible</strong>. Y si pasa de tener dos atractores a uno solo, decimos que hubo una <strong>bifurcación</strong>: un cambio cualitativo muy importante.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Objetivo del análisis</h3>
+      <p>Estudiar cómo cambia el comportamiento del sistema al variar ν:</p>
+      <ul>
+        <li>¿Cuántos atractores hay?</li>
+        <li>¿Cómo cambian sus valores?</li>
+        <li>¿Dónde ocurren las transiciones?</li>
+      </ul>
+    </div>
+    <div class="card tinted-blue">
+      <h3>Por qué es importante</h3>
+      <p>El análisis de robustez revela la <strong>plasticidad biológica</strong>: cuánto se puede perturbar el acoplamiento antes de que la célula pierda su capacidad de recordar su estado.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔀 Diagrama de bifurcación global</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      Barremos ν entre 0.1 y 3.0. Cada punto es un estado estacionario:
+      <span style="color:#22a06b; font-weight:700;">verde = estable</span>,
+      <span style="color:#f59e0b; font-weight:700;">ámbar = silla</span>,
+      <span style="color:#dc2626; font-weight:700;">rojo = inestable</span>.
+    </p>
+    <div id="plotBifurcationGlobal" class="plot" style="min-height: 480px;"></div>
+
+    <div class="simple" style="margin-top: 20px;">
+      <span class="simple-head">💡 Cómo leer este gráfico</span>
+      <ul>
+        <li><b>Tres ramas</b> = biestabilidad (dos estables + una silla). Es lo que vemos en la zona central (ν bajo e intermedio).</li>
+        <li><b>Una sola rama</b> = monostable. Es lo que vemos para ν muy grande.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ======== TARJETA OBJETIVO DE LOS PRESETS ======== -->
+  <div class="card" id="robust-analysis-card">
+    <h3>🛡️ Análisis de robustez interactivo</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      Comparamos dos configuraciones (base vs. perturbada) para cuantificar la sensibilidad del sistema.
+    </p>
+
+    <div class="controls" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="control">
+        <label>ν_base <span class="value" id="lbl-vbase">1.00</span></label>
+        <input type="range" id="vbase" min="0.1" max="2.5" step="0.05" value="1.0">
+      </div>
+      <div class="control">
+        <label>Δν (perturbación) <span class="value" id="lbl-dv">0.50</span></label>
+        <input type="range" id="dv" min="-1.0" max="1.0" step="0.05" value="0.5">
+      </div>
+      <div class="control">
+        <label>y₀ (estado inicial) <span class="value" id="lbl-y0">0.90</span></label>
+        <input type="range" id="y0" min="0.0" max="1.0" step="0.05" value="0.9">
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div id="plotRobustTime" class="plot" style="min-height: 340px;"></div>
+      <div id="plotRobustPhase" class="plot" style="min-height: 340px;"></div>
+      <div id="plotRobustBif" class="plot" style="min-height: 340px;"></div>
+    </div>
+
+    <div class="diagnostic" id="robustDiagnostic" style="margin-top: 20px;">Ajusta los controles para ver el diagnóstico.</div>
+  </div>
+
+  <div class="analogy">
+    <span class="analogy-head">🔍 Analogía: remolcar un auto</span>
+    <p>Imagina que tienes un auto en una colina con dos valles. Si le das un pequeño empujón, ¿vuelve al mismo valle? Eso es robustez. Si con el mismo empujoncito <em>cruza</em> al otro valle, el sistema es sensible. Y si con el empujoncito el auto se va rodando libre hacia un nuevo valle que antes no existía, hubo una <strong>bifurcación</strong>.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     EXPERIMENTO SUGERIDO
+     ============================================================ -->
+<section class="chapter" id="experimento">
+  <div class="chapter-header">
+    <span class="chapter-num">🔬</span>
+    <h2>Experimento Sugerido: Tres Escenarios, Tres Historias</h2>
+  </div>
+  <p class="chapter-sub">Carga cada preset y compara los diagnósticos</p>
+
+  <div class="card tinted-amber">
+    <h3>Instrucciones</h3>
+    <p>Haz clic en cada botón y observa cómo cambian automáticamente los sliders del Paso 8. Verás la página desplazarse al <b>Panel de análisis de robustez</b>. Ahí podrás observar la longitud de las "flechas" en el gráfico <b>C) Bifurcación local</b> y el diagnóstico textual. <em>"Verás" la robustez antes de leerla.</em></p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h3 style="color: var(--green);">Configuración A · Robusto</h3>
+      <p><b>ν_base = 1.00</b><br>Δν = 0.10<br>y₀ = 0.90</p>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Los atractores apenas se mueven → sistema robusto.</p>
+      <button class="btn small preset-btn"
+              data-preset="robust"
+              data-vbase="1.0" data-dv="0.10" data-y0="0.9">
+        ⤓ Cargar preset
+      </button>
+    </div>
+    <div class="card">
+      <h3 style="color: var(--amber);">Configuración B · Sensible</h3>
+      <p><b>ν_base = 1.20</b><br>Δν = −0.30<br>y₀ = 0.90</p>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Un atractor se desplaza apreciablemente → sensibilidad moderada.</p>
+      <button class="btn small preset-btn"
+              data-preset="sensitive"
+              data-vbase="1.2" data-dv="-0.30" data-y0="0.9">
+        ⤓ Cargar preset
+      </button>
+    </div>
+    <div class="card">
+      <h3 style="color: var(--red);">Configuración C · Bifurcación</h3>
+      <p><b>ν_base = 1.00</b><br>Δν = 0.90<br>y₀ = 0.90</p>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Aparece o desaparece un atractor → cambio cualitativo.</p>
+      <button class="btn small preset-btn"
+              data-preset="bifurcation"
+              data-vbase="1.0" data-dv="0.90" data-y0="0.9">
+        ⤓ Cargar preset
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CONCLUSIONES
+     ============================================================ -->
+<section class="chapter" id="conclusiones">
+  <div class="chapter-header">
+    <span class="chapter-num">📌</span>
+    <h2>Conclusiones: Lo Que Aprendimos</h2>
+  </div>
+  <p class="chapter-sub">Un repaso de las ideas principales, en lenguaje sencillo</p>
+
+  <div class="card">
+    <h3>1. Del dibujo a las ecuaciones, sin misterio</h3>
+    <p>Cada flecha del diagrama se convierte en un término matemático. Los procesos simples dan términos lineales; los procesos regulados (Hill) dan términos sigmoidales. Con eso armamos un sistema de 4 EDOs, que luego redujimos a <b>2 EDOs</b> usando una ley de conservación.</p>
+  </div>
+
+  <div class="card tinted-blue">
+    <h3>2. La cooperatividad es lo que hace la magia</h3>
+    <p>Los exponentes de Hill γ₁, γ₂ &gt; 1 son <b>esenciales</b> para tener biestabilidad. Si ponemos γ = 1, la respuesta es proporcional y el sistema <b>pierde la capacidad de conmutar</b>. Es decir: la célula necesita "respuestas bruscas" para poder tomar decisiones claras.</p>
+  </div>
+
+  <div class="card tinted-green">
+    <h3>3. La fuerza del acoplamiento ν decide el destino</h3>
+    <p>El parámetro ν controla cuán fuerte es el acoplamiento Y₁ → X₁:</p>
+    <table>
+      <thead>
+        <tr><th>Rango de ν</th><th>Comportamiento</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">ν &lt; 0.7</td><td><span class="pill green">Biestable</span> dos atractores coexisten</td></tr>
+        <tr><td class="mono">0.7 &lt; ν &lt; 1.5</td><td><span class="pill amber">Biestable asimétrico</span> asimetría creciente</td></tr>
+        <tr><td class="mono">ν &gt; 1.5</td><td><span class="pill red">Monostable</span> un único atractor</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card tinted-amber">
+    <h3>4. El pasado importa (histéresis)</h3>
+    <p>Confirmamos numéricamente que el estado final <b>depende de dónde empezó el sistema</b>. Esto es la <strong>memoria biológica</strong>: la célula recuerda su decisión.</p>
+  </div>
+
+  <div class="card tinted-red">
+    <h3>5. Por qué esto importa en biología real</h3>
+    <p>Este tipo de red aparece una y otra vez: interruptores de decisión celular, memoria epigenética, ciclos celulares irreversibles, diferenciación de linajes. Entender su matemática es entender <strong>cómo las células toman decisiones</strong>.</p>
+  </div>
+
+  <div class="card">
+    <h3>Sugerencias para seguir explorando</h3>
+    <ul class="checks">
+      <li><b>Extensión 1:</b> Cambia el término x₁^γ₂ por (x₁/K)^γ para ver cómo la afinidad modifica la respuesta.</li>
+      <li><b>Extensión 2:</b> Añade una degradación basal δ·x₁ al modelo y verifica si la biestabilidad sobrevive.</li>
+      <li><b>Extensión 3:</b> Convierte ν en una variable dinámica lenta (como en la Sección 2.9) y estudia el sistema híbrido de 3D.</li>
+      <li><b>Extensión 4:</b> Implementa una red de <b>3 nodos</b> con retroalimentación cíclica y compara el espacio de parámetros.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><b>Modelado Mecanístico No Lineal de una Red Regulatoria Biestable</b></p>
+  <p>Cuaderno interactivo · 8 pasos metodológicos · Implementación en HTML/CSS/JS con Plotly + KaTeX</p>
+  <p style="margin-top: 16px; opacity: 0.6; font-size: 0.8rem;">
+    Modelo: Toggle Switch con retroalimentación positiva doble · RK4 · Newton-Raphson · Bifurcación
+  </p>
+</footer>
+
+<script>
+// ========================================================================
+// KATEX AUTO-RENDER
+// ========================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "\\[", right: "\\]", display: true},
+      {left: "$", right: "$", display: false},
+      {left: "\\(", right: "\\)", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.hljs) hljs.highlightAll();
+  initAll();
+});
+
+// ========================================================================
+// TOAST NOTIFICATION
+// ========================================================================
+function showToast(title, message, type = 'info', duration = 3200) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const icon = type === 'success' ? '✓' : type === 'warn' ? '⚠' : 'ℹ';
+  toast.innerHTML = `
+    <div class="toast-icon">${icon}</div>
+    <div>
+      <div class="toast-title">${title}</div>
+      <div class="toast-msg">${message}</div>
+    </div>
+  `;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 500);
+  }, duration);
+}
+
+// ========================================================================
+// MODELO MATEMÁTICO
+// ========================================================================
+const P_DEFAULT = {
+  alpha1: 0.5, alpha2: 0.5,
+  beta1: 5.0, beta2: 5.0,
+  K1: 0.5, K2: 0.5,
+  gamma1: 4.0, gamma2: 4.0,
+  v: 1.0
+};
+
+function model(x1, y1, p) {
+  x1 = Math.max(1e-9, Math.min(1 - 1e-9, x1));
+  y1 = Math.max(1e-9, Math.min(1 - 1e-9, y1));
+
+  const vy1 = p.v * y1;
+  const num1 = Math.pow(vy1, p.gamma1);
+  const den1 = p.K1 + num1;
+  const hill1 = den1 > 0 ? num1 / den1 : 0;
+
+  const num2 = Math.pow(x1, p.gamma2);
+  const den2 = p.K2 + num2;
+  const hill2 = den2 > 0 ? num2 / den2 : 0;
+
+  const dx1dt = p.alpha1 * (1 - x1) - p.beta1 * x1 * hill1;
+  const dy1dt = p.alpha2 * (1 - y1) - p.beta2 * y1 * hill2;
+  return [dx1dt, dy1dt];
+}
+
+// ========================================================================
+// INTEGRADOR RK4
+// ========================================================================
+function rk4(x0, y0, tmax, nPoints, p) {
+  const dt = tmax / (nPoints - 1);
+  const t = new Float64Array(nPoints);
+  const x = new Float64Array(nPoints);
+  const y = new Float64Array(nPoints);
+  let xc = x0, yc = y0;
+  t[0] = 0; x[0] = xc; y[0] = yc;
+
+  for (let i = 0; i < nPoints - 1; i++) {
+    const [k1x, k1y] = model(xc, yc, p);
+    const [k2x, k2y] = model(xc + dt/2*k1x, yc + dt/2*k1y, p);
+    const [k3x, k3y] = model(xc + dt/2*k2x, yc + dt/2*k2y, p);
+    const [k4x, k4y] = model(xc + dt*k3x, yc + dt*k3y, p);
+    xc = xc + dt/6 * (k1x + 2*k2x + 2*k3x + k4x);
+    yc = yc + dt/6 * (k1y + 2*k2y + 2*k3y + k4y);
+    xc = Math.max(0, Math.min(1, xc));
+    yc = Math.max(0, Math.min(1, yc));
+    t[i+1] = (i+1) * dt;
+    x[i+1] = xc; y[i+1] = yc;
+  }
+  return {t: Array.from(t), x: Array.from(x), y: Array.from(y)};
+}
+
+// ========================================================================
+// JACOBIANO NUMÉRICO
+// ========================================================================
+function jacobian(x1, y1, p, eps = 1e-6) {
+  const [f0x, f0y] = model(x1, y1, p);
+  const [fxx, fxy] = model(x1 + eps, y1, p);
+  const [fyx, fyy] = model(x1, y1 + eps, p);
+  return [
+    [(fxx - f0x) / eps, (fyx - f0x) / eps],
+    [(fxy - f0y) / eps, (fyy - f0y) / eps]
+  ];
+}
+
+// ========================================================================
+// NEWTON-RAPHSON
+// ========================================================================
+function newtonRaphson(x0, y0, p, maxIter = 60, tol = 1e-9) {
+  let x = x0, y = y0;
+  for (let i = 0; i < maxIter; i++) {
+    const [fx, fy] = model(x, y, p);
+    if (Math.hypot(fx, fy) < tol) break;
+    const J = jacobian(x, y, p);
+    const det = J[0][0]*J[1][1] - J[0][1]*J[1][0];
+    if (Math.abs(det) < 1e-14) break;
+    const dx = (-J[1][1]*fx + J[0][1]*fy) / det;
+    const dy = (J[1][0]*fx - J[0][0]*fy) / det;
+    x += dx; y += dy;
+    x = Math.max(-0.5, Math.min(1.5, x));
+    y = Math.max(-0.5, Math.min(1.5, y));
+  }
+  return [x, y];
+}
+
+// ========================================================================
+// BUSCAR TODOS LOS PUNTOS FIJOS
+// ========================================================================
+function findFixedPoints(p) {
+  const n = 10;
+  const found = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const seed = [i/(n-1), j/(n-1)];
+      const [x, y] = newtonRaphson(seed[0], seed[1], p);
+      if (x >= -0.02 && x <= 1.02 && y >= -0.02 && y <= 1.02) {
+        if (!found.some(fp => Math.hypot(fp[0]-x, fp[1]-y) < 1e-3)) {
+          found.push([x, y]);
+        }
+      }
+    }
+  }
+  return found;
+}
+
+// ========================================================================
+// CLASIFICAR PUNTO FIJO
+// ========================================================================
+function classify(x, y, p) {
+  const J = jacobian(x, y, p);
+  const tr = J[0][0] + J[1][1];
+  const det = J[0][0]*J[1][1] - J[0][1]*J[1][0];
+  if (det > 0 && tr < 0) return 'stable';
+  if (det < 0) return 'saddle';
+  if (det > 0 && tr > 0) return 'unstable';
+  return 'special';
+}
+
+function classifyLabel(cls) {
+  if (cls === 'stable') return 'estable (atractor)';
+  if (cls === 'saddle') return 'silla';
+  if (cls === 'unstable') return 'inestable';
+  return 'centro / caso especial';
+}
+
+// ========================================================================
+// NULLCLINES
+// ========================================================================
+function nullclineX(x1, p) {
+  x1 = Math.max(1e-9, Math.min(1-1e-9, x1));
+  const num = p.K1 * p.alpha1 * (1 - x1);
+  const den = p.beta1 * x1 - p.alpha1 * (1 - x1);
+  if (den <= 0) return NaN;
+  const ratio = num / den;
+  if (ratio < 0) return NaN;
+  return (1 / p.v) * Math.pow(ratio, 1 / p.gamma1);
+}
+
+function nullclineY(x1, p) {
+  x1 = Math.max(1e-9, Math.min(1-1e-9, x1));
+  const num = p.alpha2;
+  const den = p.alpha2 + p.beta2 * Math.pow(x1, p.gamma2) / (p.K2 + Math.pow(x1, p.gamma2));
+  return num / den;
+}
+
+// ========================================================================
+// HELPERS EXPLORER
+// ========================================================================
+function readParamsFromExplorer() {
+  return {
+    alpha1: +document.getElementById('alpha1').value,
+    alpha2: +document.getElementById('alpha2').value,
+    beta1: +document.getElementById('beta1').value,
+    beta2: +document.getElementById('beta2').value,
+    K1: +document.getElementById('K1').value,
+    K2: +document.getElementById('K2').value,
+    gamma1: +document.getElementById('gamma1').value,
+    gamma2: +document.getElementById('gamma2').value,
+    v: +document.getElementById('v').value,
+  };
+}
+
+function updateLabelsExplorer(p) {
+  document.getElementById('lbl-alpha1').textContent = p.alpha1.toFixed(2);
+  document.getElementById('lbl-alpha2').textContent = p.alpha2.toFixed(2);
+  document.getElementById('lbl-beta1').textContent = p.beta1.toFixed(2);
+  document.getElementById('lbl-beta2').textContent = p.beta2.toFixed(2);
+  document.getElementById('lbl-K1').textContent = p.K1.toFixed(2);
+  document.getElementById('lbl-K2').textContent = p.K2.toFixed(2);
+  document.getElementById('lbl-gamma1').textContent = p.gamma1.toFixed(1);
+  document.getElementById('lbl-gamma2').textContent = p.gamma2.toFixed(1);
+  document.getElementById('lbl-v').textContent = p.v.toFixed(2);
+}
+
+// ========================================================================
+// PLOTLY CONFIG
+// ========================================================================
+const PLOTLY_CONFIG = {responsive: true, displaylogo: false, modeBarButtonsToRemove: ['lasso2d', 'select2d']};
+
+const LAYOUT_COMMON = {
+  margin: {l: 55, r: 20, t: 45, b: 50},
+  font: {family: "'Inter', sans-serif", size: 12, color: '#0f172a'},
+  paper_bgcolor: '#ffffff',
+  plot_bgcolor: '#fafbfc',
+  xaxis: {gridcolor: '#e2e8f0', zerolinecolor: '#cbd5e1'},
+  yaxis: {gridcolor: '#e2e8f0', zerolinecolor: '#cbd5e1'},
+  hovermode: 'closest'
+};
+
+// ========================================================================
+// EXPLORADOR
+// ========================================================================
+function updateExplorer() {
+  const p = readParamsFromExplorer();
+  updateLabelsExplorer(p);
+
+  const sol1 = rk4(0.0, 0.0, 20, 1200, p);
+  const sol2 = rk4(0.0, 0.9, 20, 1200, p);
+
+  const tracesTime = [
+    {x: sol1.t, y: sol1.y, mode: 'lines', name: 'y₀ = [0, 0]', line: {color: '#0f172a', width: 2.5}},
+    {x: sol2.t, y: sol2.y, mode: 'lines', name: 'y₀ = [0, 0.9]', line: {color: '#dc2626', width: 2.5}},
+    {x: [20], y: [sol1.y[sol1.y.length-1]], mode: 'markers',
+     marker: {color: '#0f172a', size: 12, line: {color: '#fff', width: 2}}, showlegend: false},
+    {x: [20], y: [sol2.y[sol2.y.length-1]], mode: 'markers',
+     marker: {color: '#dc2626', size: 12, line: {color: '#fff', width: 2}}, showlegend: false}
+  ];
+
+  Plotly.react('plotExplorerTime', tracesTime, {
+    ...LAYOUT_COMMON,
+    title: {text: 'Dinámica de y₁(t)', font: {size: 14}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 't', range: [0, 20]},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁(t)', range: [-0.02, 1.02]},
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1}
+  }, PLOTLY_CONFIG);
+
+  const tracesPhase = buildPhasePortrait(p, sol1.x, sol1.y);
+  Plotly.react('plotExplorerPhase', tracesPhase, {
+    ...LAYOUT_COMMON,
+    title: {text: 'Diagrama de fase', font: {size: 14}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 'x₁', range: [0, 1]},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁', range: [0, 1], scaleanchor: 'x'},
+    showlegend: true,
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 9}}
+  }, PLOTLY_CONFIG);
+}
+
+// ========================================================================
+// PHASE PORTRAIT
+// ========================================================================
+function buildPhasePortrait(p, trajX = null, trajY = null, extraTrajs = []) {
+  const ngrid = 22;
+  const xs = [], ys = [], us = [], vs = [];
+  for (let i = 0; i < ngrid; i++) {
+    for (let j = 0; j < ngrid; j++) {
+      const x = i / (ngrid - 1);
+      const y = j / (ngrid - 1);
+      const [dx, dy] = model(x, y, p);
+      xs.push(x); ys.push(y);
+      const n = Math.hypot(dx, dy) + 1e-12;
+      us.push(dx / n); vs.push(dy / n);
+    }
+  }
+
+  const traces = [
+    {
+      type: 'scatter', mode: 'lines',
+      x: xs.map((x, k) => x - us[k] * 0.02),
+      y: ys.map((y, k) => y - vs[k] * 0.02),
+      line: {color: 'rgba(37, 99, 235, 0.5)', width: 1},
+      showlegend: false, hoverinfo: 'skip'
+    },
+    {
+      type: 'scatter', mode: 'lines',
+      x: xs, y: ys,
+      line: {color: 'rgba(37, 99, 235, 0.7)', width: 1},
+      showlegend: false, hoverinfo: 'skip'
+    },
+    {
+      type: 'scatter', mode: 'markers',
+      x: xs, y: ys,
+      marker: {
+        symbol: 'arrow', size: 9, angleref: 'previous',
+        color: 'rgba(37, 99, 235, 0.75)',
+        angle: us.map((u, k) => Math.atan2(vs[k], u) * 180 / Math.PI - 90)
+      },
+      showlegend: false, hoverinfo: 'skip'
+    }
+  ];
+
+  const xg = [];
+  const ncx = [], ncy = [];
+  for (let i = 1; i < 400; i++) {
+    const x = i / 400;
+    xg.push(x);
+    ncx.push(nullclineX(x, p));
+    ncy.push(nullclineY(x, p));
+  }
+  traces.push({type: 'scatter', mode: 'lines', x: xg, y: ncx, name: 'dx₁/dt = 0',
+    line: {color: '#0f172a', width: 2.5}});
+  traces.push({type: 'scatter', mode: 'lines', x: xg, y: ncy, name: 'dy₁/dt = 0',
+    line: {color: '#94a3b8', width: 2.5, dash: 'dash'}});
+
+  if (trajX && trajY) {
+    traces.push({type: 'scatter', mode: 'lines', x: trajX, y: trajY, name: 'Trayectoria',
+      line: {color: '#7c3aed', width: 3}});
+    traces.push({type: 'scatter', mode: 'markers',
+      x: [trajX[trajX.length-1]], y: [trajY[trajY.length-1]],
+      marker: {color: '#7c3aed', size: 14, line: {color: '#fff', width: 2}}, showlegend: false});
+  }
+
+  extraTrajs.forEach(t => {
+    traces.push({type: 'scatter', mode: 'lines', x: t.x, y: t.y, name: t.name,
+      line: {color: t.color || '#7c3aed', width: 2.5, dash: t.dash || 'solid'}});
+  });
+
+  const fps = findFixedPoints(p);
+  const colors = {stable: '#22a06b', saddle: '#f59e0b', unstable: '#dc2626'};
+  fps.forEach(fp => {
+    const cls = classify(fp[0], fp[1], p);
+    traces.push({
+      type: 'scatter', mode: 'markers',
+      x: [fp[0]], y: [fp[1]],
+      marker: {
+        color: colors[cls] || '#888', size: 16,
+        line: {color: '#fff', width: 2.5},
+        symbol: cls === 'saddle' ? 'square' : 'circle'
+      },
+      name: cls.charAt(0).toUpperCase() + cls.slice(1),
+      showlegend: false,
+      hovertemplate: `(${fp[0].toFixed(3)}, ${fp[1].toFixed(3)})<br>${classifyLabel(cls)}<extra></extra>`
+    });
+  });
+
+  return traces;
+}
+
+// ========================================================================
+// EVENTOS EXPLORADOR
+// ========================================================================
+['alpha1','alpha2','beta1','beta2','K1','K2','gamma1','gamma2','v'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateExplorer);
+});
+
+function resetParams() {
+  const defaults = {alpha1:0.5, alpha2:0.5, beta1:5.0, beta2:5.0, K1:0.5, K2:0.5, gamma1:4.0, gamma2:4.0, v:1.0};
+  Object.entries(defaults).forEach(([k,val]) => {
+    const el = document.getElementById(k);
+    if (el) el.value = val;
+  });
+  updateExplorer();
+  showToast('Parámetros reseteados', 'Configuración por defecto restaurada.', 'info', 2200);
+}
+
+function loadBistable() {
+  const cfg = {alpha1:0.5, alpha2:0.5, beta1:5.0, beta2:5.0, K1:0.5, K2:0.5, gamma1:4.0, gamma2:4.0, v:1.0};
+  Object.entries(cfg).forEach(([k,val]) => {
+    const el = document.getElementById(k);
+    if (el) el.value = val;
+  });
+  updateExplorer();
+  showToast('Modo biestable', 'ν = 1.00 · dos atractores coexisten.', 'success', 2600);
+}
+
+function loadMonostable() {
+  const cfg = {alpha1:0.5, alpha2:0.5, beta1:5.0, beta2:5.0, K1:0.5, K2:0.5, gamma1:4.0, gamma2:4.0, v:2.5};
+  Object.entries(cfg).forEach(([k,val]) => {
+    const el = document.getElementById(k);
+    if (el) el.value = val;
+  });
+  updateExplorer();
+  showToast('Modo monostable', 'ν = 2.50 · un único atractor global.', 'warn', 2600);
+}
+
+window.resetParams = resetParams;
+window.loadBistable = loadBistable;
+window.loadMonostable = loadMonostable;
+
+// ========================================================================
+// PASO 5 — LISTA DE PUNTOS FIJOS
+// ========================================================================
+function updateFixedPointsList() {
+  const fps = findFixedPoints(P_DEFAULT);
+  const list = document.getElementById('fixedPointsList');
+  if (!list) return;
+  list.innerHTML = '';
+  const sortedFps = fps.slice().sort((a,b) => b[1] - a[1]);
+  sortedFps.forEach(fp => {
+    const cls = classify(fp[0], fp[1], P_DEFAULT);
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="fp-dot ${cls}"></span>
+      <span>(x₁*, y₁*) = (${fp[0].toFixed(4)}, ${fp[1].toFixed(4)})</span>
+      <span class="pill ${cls === 'stable' ? 'green' : cls === 'saddle' ? 'amber' : 'red'}">${classifyLabel(cls)}</span>
+    `;
+    list.appendChild(li);
+  });
+}
+
+// ========================================================================
+// PASO 6 — FIG 3
+// ========================================================================
+function updateFig3() {
+  const v = +document.getElementById('fig3v').value;
+  document.getElementById('lbl-fig3-v').textContent = v.toFixed(2);
+
+  const p = {...P_DEFAULT, v};
+  const sol1 = rk4(0.0, 0.0, 20, 1000, p);
+  const sol2 = rk4(0.0, 0.9, 20, 1000, p);
+
+  Plotly.react('plotFig3Time', [
+    {x: sol1.t, y: sol1.y, mode: 'lines', name: 'y₀ = [0, 0]', line: {color: '#0f172a', width: 2.5}},
+    {x: sol2.t, y: sol2.y, mode: 'lines', name: 'y₀ = [0, 0.9]', line: {color: '#dc2626', width: 2.5}},
+    {x: [20], y: [sol1.y[sol1.y.length-1]], mode: 'markers',
+     marker: {color: '#0f172a', size: 11, line: {color: '#fff', width: 2}}, showlegend: false},
+    {x: [20], y: [sol2.y[sol2.y.length-1]], mode: 'markers',
+     marker: {color: '#dc2626', size: 11, line: {color: '#fff', width: 2}}, showlegend: false}
+  ], {
+    ...LAYOUT_COMMON,
+    title: {text: `Dinámica de y₁, ν = ${v.toFixed(2)}`, font: {size: 13}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 't', range: [0, 20]},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁(t)', range: [-0.02, 1.02]},
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 10}}
+  }, PLOTLY_CONFIG);
+
+  const traces = buildPhasePortrait(p, sol1.x, sol1.y);
+  Plotly.react('plotFig3Phase', traces, {
+    ...LAYOUT_COMMON,
+    title: {text: `Diagrama de fase, ν = ${v.toFixed(2)}`, font: {size: 13}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 'x₁', range: [0, 1]},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁', range: [0, 1], scaleanchor: 'x'},
+    showlegend: true,
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 9}}
+  }, PLOTLY_CONFIG);
+}
+
+const fig3vEl = document.getElementById('fig3v');
+if (fig3vEl) fig3vEl.addEventListener('input', updateFig3);
+
+// ========================================================================
+// PASO 6 — MULTI-ν
+// ========================================================================
+function updateMultiNu() {
+  const vValues = [0.5, 0.75, 1.0, 1.3, 1.6, 2.0, 2.5];
+  const colors = ['#0f172a', '#1e4767', '#2563eb', '#22a06b', '#f59e0b', '#dc2626', '#7c3aed'];
+  const traces = vValues.map((v, idx) => {
+    const p = {...P_DEFAULT, v};
+    const sol = rk4(0.0, 0.9, 25, 1500, p);
+    return {x: sol.t, y: sol.y, mode: 'lines', name: `ν = ${v.toFixed(2)}`,
+      line: {color: colors[idx], width: 2.5}};
+  });
+
+  Plotly.react('plotMultiNu', traces, {
+    ...LAYOUT_COMMON,
+    title: {text: 'Dinámica de y₁(t) para distintos valores de ν (y₀ = 0.9)', font: {size: 14}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 't', range: [0, 25]},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁(t)', range: [-0.02, 1.02]},
+    legend: {x: 1.02, y: 1, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1}
+  }, PLOTLY_CONFIG);
+}
+
+// ========================================================================
+// PASO 7 — OPTIMIZACIÓN
+// ========================================================================
+let OPTIM_DATA = null;
+
+function generateOptimData() {
+  const pTrue = {...P_DEFAULT, v: 1.0};
+  const sol = rk4(0.0, 0.9, 15, 1000, pTrue);
+  const tExp = [];
+  for (let i = 0; i < 20; i++) tExp.push(i * 15 / 19);
+  const yExp = tExp.map(t => {
+    const idx = Math.min(999, Math.max(0, Math.round(t / 15 * 999)));
+    const base = sol.y[idx];
+    const noise = (Math.sin(t * 137.5) * 0.5 + Math.cos(t * 89.3) * 0.5) * 0.03;
+    return Math.max(0, Math.min(1, base + noise));
+  });
+  return {tExp, yExp};
+}
+
+function updateOptim() {
+  if (!OPTIM_DATA) OPTIM_DATA = generateOptimData();
+  const {tExp, yExp} = OPTIM_DATA;
+
+  const v = +document.getElementById('optimv').value;
+  document.getElementById('lbl-optim-v').textContent = v.toFixed(2);
+
+  const p = {...P_DEFAULT, v};
+  const sol = rk4(0.0, 0.9, 15, 1000, p);
+
+  const yModel = tExp.map(t => {
+    const idx = Math.min(999, Math.max(0, Math.round(t / 15 * 999)));
+    return sol.y[idx];
+  });
+
+  const sse = tExp.reduce((acc, t, i) => acc + Math.pow(yExp[i] - yModel[i], 2), 0);
+
+  Plotly.react('plotOptimFit', [
+    {x: tExp, y: yExp, mode: 'markers', name: 'Datos experimentales',
+     marker: {color: '#dc2626', size: 11, line: {color: '#fff', width: 2}}},
+    {x: tExp, y: yModel, mode: 'lines+markers', name: `Modelo (ν = ${v.toFixed(2)})`,
+     line: {color: '#2563eb', width: 3}, marker: {color: '#2563eb', size: 7}}
+  ], {
+    ...LAYOUT_COMMON,
+    title: {text: `Ajuste del modelo — SSE = ${sse.toFixed(4)}`, font: {size: 13}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 't'},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁(t)', range: [-0.05, 1.05]},
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 10}}
+  }, PLOTLY_CONFIG);
+
+  const vRange = [];
+  for (let i = 0; i <= 60; i++) vRange.push(0.1 + (3.0 - 0.1) * i / 60);
+  const sseCurve = vRange.map(vv => {
+    const pp = {...P_DEFAULT, v: vv};
+    const ss = rk4(0.0, 0.9, 15, 500, pp);
+    let err = 0;
+    for (let i = 0; i < tExp.length; i++) {
+      const idx = Math.min(499, Math.max(0, Math.round(tExp[i] / 15 * 499)));
+      err += Math.pow(yExp[i] - ss.y[idx], 2);
+    }
+    return err;
+  });
+
+  const minIdx = sseCurve.indexOf(Math.min(...sseCurve));
+  const vBest = vRange[minIdx];
+
+  Plotly.react('plotOptimSSE', [
+    {x: vRange, y: sseCurve, mode: 'lines', name: 'SSE(ν)', line: {color: '#7c3aed', width: 3}},
+    {x: [v], y: [sse], mode: 'markers', name: `Actual (ν = ${v.toFixed(2)})`,
+     marker: {color: '#dc2626', size: 14, line: {color: '#fff', width: 2}}},
+    {x: [vBest], y: [sseCurve[minIdx]], mode: 'markers', name: `Óptimo (ν = ${vBest.toFixed(2)})`,
+     marker: {color: '#22a06b', size: 14, line: {color: '#fff', width: 2}}}
+  ], {
+    ...LAYOUT_COMMON,
+    title: {text: 'Paisaje de error SSE(ν)', font: {size: 13}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 'ν'},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'SSE'},
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 10}}
+  }, PLOTLY_CONFIG);
+
+  const verd = document.getElementById('optimVerdict');
+  const text = document.getElementById('optimVerdictText');
+  const gap = Math.abs(v - 1.0);
+  if (gap < 0.08) {
+    verd.className = 'callout success';
+    text.innerHTML = `<b>¡Excelente ajuste!</b> ν = ${v.toFixed(2)} está muy cerca del valor verdadero (ν_true = 1.0). SSE = ${sse.toFixed(4)}`;
+  } else if (gap < 0.25) {
+    verd.className = 'callout info';
+    text.innerHTML = `<b>Buen ajuste.</b> ν = ${v.toFixed(2)} está cerca del valor verdadero (ν_true = 1.0). SSE = ${sse.toFixed(4)}`;
+  } else {
+    verd.className = 'callout warn';
+    text.innerHTML = `<b>Ajuste pobre.</b> ν = ${v.toFixed(2)} está lejos del valor verdadero (ν_true = 1.0). SSE = ${sse.toFixed(4)} — intenta acercar el slider a 1.0.`;
+  }
+}
+
+const optimvEl = document.getElementById('optimv');
+if (optimvEl) optimvEl.addEventListener('input', updateOptim);
+
+// ========================================================================
+// PASO 8 — BIFURCACIÓN GLOBAL
+// ========================================================================
+function updateBifurcationGlobal() {
+  const vRange = [];
+  const nPoints = 70;
+  for (let i = 0; i <= nPoints; i++) vRange.push(0.1 + (3.0 - 0.1) * i / nPoints);
+
+  const stableX = [], stableY = [];
+  const saddleX = [], saddleY = [];
+  const unstableX = [], unstableY = [];
+
+  vRange.forEach(v => {
+    const p = {...P_DEFAULT, v};
+    const fps = findFixedPoints(p);
+    fps.forEach(fp => {
+      const cls = classify(fp[0], fp[1], p);
+      if (cls === 'stable') { stableX.push(v); stableY.push(fp[1]); }
+      else if (cls === 'saddle') { saddleX.push(v); saddleY.push(fp[1]); }
+      else if (cls === 'unstable') { unstableX.push(v); unstableY.push(fp[1]); }
+    });
+  });
+
+  Plotly.react('plotBifurcationGlobal', [
+    {x: stableX, y: stableY, mode: 'markers', name: 'Estable',
+     marker: {color: '#22a06b', size: 9, line: {color: '#fff', width: 1}}},
+    {x: saddleX, y: saddleY, mode: 'markers', name: 'Silla',
+     marker: {color: '#f59e0b', size: 8, symbol: 'square', line: {color: '#fff', width: 1}}},
+    {x: unstableX, y: unstableY, mode: 'markers', name: 'Inestable',
+     marker: {color: '#dc2626', size: 7, line: {color: '#fff', width: 1}}}
+  ], {
+    ...LAYOUT_COMMON,
+    title: {text: 'Diagrama de bifurcación — Puntos fijos vs ν', font: {size: 14}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 'ν (fuerza de acoplamiento Y₁ → X₁)'},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁* (estado estacionario)', range: [-0.02, 1.02]},
+    legend: {x: 1.02, y: 1, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1},
+    shapes: [
+      {type: 'line', x0: 0.7, x1: 0.7, y0: 0, y1: 1, yref: 'paper',
+       line: {color: 'rgba(220,38,38,0.4)', width: 1.5, dash: 'dot'}},
+      {type: 'line', x0: 1.5, x1: 1.5, y0: 0, y1: 1, yref: 'paper',
+       line: {color: 'rgba(220,38,38,0.4)', width: 1.5, dash: 'dot'}}
+    ]
+  }, PLOTLY_CONFIG);
+}
+
+// ========================================================================
+// PASO 8 — ROBUSTEZ
+// ========================================================================
+function setRobustPreset(vbase, dv, y0, presetName = '') {
+  const vbaseEl = document.getElementById('vbase');
+  const dvEl = document.getElementById('dv');
+  const y0El = document.getElementById('y0');
+  if (!vbaseEl || !dvEl || !y0El) {
+    console.warn('Elementos de robustez no encontrados');
+    return;
+  }
+
+  vbaseEl.value = vbase;
+  dvEl.value = dv;
+  y0El.value = y0;
+
+  vbaseEl.dispatchEvent(new Event('input', {bubbles: true}));
+  dvEl.dispatchEvent(new Event('input', {bubbles: true}));
+  y0El.dispatchEvent(new Event('input', {bubbles: true}));
+
+  try {
+    updateRobust();
+  } catch(e) {
+    console.error('Error en updateRobust:', e);
+  }
+
+  const flashEls = [vbaseEl, dvEl, y0El];
+  flashEls.forEach(el => {
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 1200);
+  });
+  ['lbl-vbase', 'lbl-dv', 'lbl-y0'].forEach(id => {
+    const lbl = document.getElementById(id);
+    if (lbl) {
+      lbl.classList.add('flash');
+      setTimeout(() => lbl.classList.remove('flash'), 1200);
+    }
+  });
+
+  const targetCard = document.getElementById('robust-analysis-card');
+  if (targetCard) {
+    setTimeout(() => {
+      targetCard.classList.remove('flash');
+      void targetCard.offsetWidth;
+      targetCard.classList.add('flash');
+    }, 100);
+
+    const yOffset = -70;
+    const y = targetCard.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({top: y, behavior: 'smooth'});
+  }
+
+  const presetLabels = {
+    robust: {title: '✓ Configuración A cargada', msg: `ν_base = ${vbase.toFixed(2)}, Δν = ${dv.toFixed(2)} · Sistema robusto esperado`, type: 'success'},
+    sensitive: {title: '✓ Configuración B cargada', msg: `ν_base = ${vbase.toFixed(2)}, Δν = ${dv.toFixed(2)} · Sensibilidad moderada esperada`, type: 'info'},
+    bifurcation: {title: '⚠ Configuración C cargada', msg: `ν_base = ${vbase.toFixed(2)}, Δν = ${dv.toFixed(2)} · Posible bifurcación detectada`, type: 'warn'}
+  };
+  const info = presetLabels[presetName] || {title: '✓ Preset cargado', msg: `ν_base = ${vbase.toFixed(2)}, Δν = ${dv.toFixed(2)}`, type: 'info'};
+  showToast(info.title, info.msg, info.type, 3500);
+}
+
+window.setRobustPreset = setRobustPreset;
+
+function updateRobust() {
+  const vbase = +document.getElementById('vbase').value;
+  const dv = +document.getElementById('dv').value;
+  const y0 = +document.getElementById('y0').value;
+  const vpert = vbase + dv;
+
+  document.getElementById('lbl-vbase').textContent = vbase.toFixed(2);
+  document.getElementById('lbl-dv').textContent = dv.toFixed(2);
+  document.getElementById('lbl-y0').textContent = y0.toFixed(2);
+
+  const pBase = {...P_DEFAULT, v: vbase};
+  const pPert = {...P_DEFAULT, v: vpert};
+
+  const solBase = rk4(0.0, y0, 20, 1000, pBase);
+  const solPert = rk4(0.0, y0, 20, 1000, pPert);
+
+  Plotly.react('plotRobustTime', [
+    {x: solBase.t, y: solBase.y, mode: 'lines', name: `ν = ${vbase.toFixed(2)} (base)`,
+     line: {color: '#16324f', width: 3}},
+    {x: solPert.t, y: solPert.y, mode: 'lines', name: `ν = ${vpert.toFixed(2)} (pert.)`,
+     line: {color: '#dc2626', width: 3, dash: 'dash'}},
+    {x: [20], y: [solBase.y[999]], mode: 'markers',
+     marker: {color: '#16324f', size: 13, line: {color: '#fff', width: 2}}, showlegend: false},
+    {x: [20], y: [solPert.y[999]], mode: 'markers',
+     marker: {color: '#dc2626', size: 13, line: {color: '#fff', width: 2}}, showlegend: false}
+  ], {
+    ...LAYOUT_COMMON,
+    title: {text: 'A) Dinámica temporal', font: {size: 12}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 't', range: [0, 20]},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁(t)', range: [-0.02, 1.02]},
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 9}},
+    margin: {l: 45, r: 10, t: 40, b: 40}
+  }, PLOTLY_CONFIG);
+
+  const tracesPhase = buildPhasePortrait(pBase, solBase.x, solBase.y, [
+    {x: solPert.x, y: solPert.y, name: 'ν pert.', color: '#dc2626', dash: 'dash'}
+  ]);
+
+  const xg = [];
+  const ncxP = [];
+  for (let i = 1; i < 400; i++) {
+    const x = i / 400;
+    xg.push(x);
+    ncxP.push(nullclineX(x, pPert));
+  }
+  tracesPhase.push({
+    type: 'scatter', mode: 'lines', x: xg, y: ncxP, name: 'dx/dt=0 (pert.)',
+    line: {color: '#dc2626', width: 2, dash: 'dot'}
+  });
+
+  const fpsP = findFixedPoints(pPert);
+  const colors = {stable: '#22a06b', saddle: '#f59e0b', unstable: '#dc2626'};
+  fpsP.forEach(fp => {
+    const cls = classify(fp[0], fp[1], pPert);
+    tracesPhase.push({
+      type: 'scatter', mode: 'markers',
+      x: [fp[0]], y: [fp[1]],
+      marker: {
+        color: colors[cls] || '#888', size: 16,
+        line: {color: '#dc2626', width: 2},
+        symbol: cls === 'saddle' ? 'square' : 'circle',
+        opacity: 0.55
+      },
+      showlegend: false, hoverinfo: 'skip'
+    });
+  });
+
+  Plotly.react('plotRobustPhase', tracesPhase, {
+    ...LAYOUT_COMMON,
+    title: {text: 'B) Plano de fase superpuesto', font: {size: 12}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 'x₁', range: [0, 1]},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁', range: [0, 1], scaleanchor: 'x'},
+    showlegend: true,
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 8}},
+    margin: {l: 45, r: 10, t: 40, b: 40}
+  }, PLOTLY_CONFIG);
+
+  const vZoomMin = Math.max(0.1, vbase - 1.0);
+  const vZoomMax = vbase + 1.0;
+  const vZoom = [];
+  for (let i = 0; i <= 60; i++) vZoom.push(vZoomMin + i * (vZoomMax - vZoomMin) / 60);
+
+  const stableX = [], stableY = [];
+  const saddleX = [], saddleY = [];
+  const unstableX = [], unstableY = [];
+
+  vZoom.forEach(v => {
+    const p = {...P_DEFAULT, v};
+    const fps = findFixedPoints(p);
+    fps.forEach(fp => {
+      const cls = classify(fp[0], fp[1], p);
+      if (cls === 'stable') { stableX.push(v); stableY.push(fp[1]); }
+      else if (cls === 'saddle') { saddleX.push(v); saddleY.push(fp[1]); }
+      else if (cls === 'unstable') { unstableX.push(v); unstableY.push(fp[1]); }
+    });
+  });
+
+  Plotly.react('plotRobustBif', [
+    {x: stableX, y: stableY, mode: 'markers', name: 'Estable', marker: {color: '#22a06b', size: 6}},
+    {x: saddleX, y: saddleY, mode: 'markers', name: 'Silla', marker: {color: '#f59e0b', size: 6, symbol: 'square'}},
+    {x: unstableX, y: unstableY, mode: 'markers', name: 'Inestable', marker: {color: '#dc2626', size: 5}},
+    {x: [vbase, vbase], y: [0, 1], mode: 'lines', name: `ν_base = ${vbase.toFixed(2)}`,
+     line: {color: '#16324f', width: 3}},
+    {x: [vpert, vpert], y: [0, 1], mode: 'lines', name: `ν_pert = ${vpert.toFixed(2)}`,
+     line: {color: '#dc2626', width: 3, dash: 'dash'}}
+  ], {
+    ...LAYOUT_COMMON,
+    title: {text: 'C) Bifurcación local', font: {size: 12}},
+    xaxis: {...LAYOUT_COMMON.xaxis, title: 'ν'},
+    yaxis: {...LAYOUT_COMMON.yaxis, title: 'y₁*', range: [-0.02, 1.02]},
+    legend: {x: 0.02, y: 0.98, bgcolor: 'rgba(255,255,255,0.9)', bordercolor: '#e2e8f0', borderwidth: 1, font: {size: 9}},
+    margin: {l: 45, r: 10, t: 40, b: 40}
+  }, PLOTLY_CONFIG);
+
+  const fpsBase = findFixedPoints(pBase);
+  const fpsPert = findFixedPoints(pPert);
+  const stableBase = fpsBase.filter(fp => classify(fp[0], fp[1], pBase) === 'stable');
+  const stablePert = fpsPert.filter(fp => classify(fp[0], fp[1], pPert) === 'stable');
+
+  const diagEl = document.getElementById('robustDiagnostic');
+  let diag = '═══════════════════════════════════════════════════════════\n';
+  diag += '  DIAGNÓSTICO DE ROBUSTEZ\n';
+  diag += '═══════════════════════════════════════════════════════════\n\n';
+  diag += `ν_base       = ${vbase.toFixed(3)}   →  ${stableBase.length} atractor(es) estable(s)\n`;
+  diag += `ν_perturbado = ${vpert.toFixed(3)}   →  ${stablePert.length} atractor(es) estable(s)\n\n`;
+  diag += 'Atractores base:\n';
+  stableBase.forEach(fp => { diag += `   (x₁*, y₁*) = (${fp[0].toFixed(4)}, ${fp[1].toFixed(4)})\n`; });
+  diag += 'Atractores perturbados:\n';
+  stablePert.forEach(fp => { diag += `   (x₁*, y₁*) = (${fp[0].toFixed(4)}, ${fp[1].toFixed(4)})\n`; });
+  diag += '\n';
+
+  if (stableBase.length !== stablePert.length) {
+    diag += '⚠️  Transición cualitativa (BIFURCACIÓN) detectada.\n';
+    diag += '     El sistema cambió el número de atractores → NO robusto.\n';
+    diagEl.className = 'diagnostic err';
+  } else {
+    const dists = stableBase.map(fpA => {
+      return Math.min(...stablePert.map(fpB => Math.hypot(fpA[0]-fpB[0], fpA[1]-fpB[1])));
+    });
+    const dmax = dists.length ? Math.max(...dists) : 0;
+    diag += `✓  Mismo número de atractores.\n`;
+    diag += `   Desplazamiento máximo: ${dmax.toFixed(4)}\n`;
+    if (dmax < 0.05) {
+      diag += '   → Sistema ROBUSTO (atractores casi no se mueven).\n';
+      diagEl.className = 'diagnostic ok';
+    } else if (dmax < 0.15) {
+      diag += '   → Sistema MODERADAMENTE SENSIBLE.\n';
+      diagEl.className = 'diagnostic warn';
+    } else {
+      diag += '   → Sistema PLÁSTICO (atractores se desplazan mucho).\n';
+      diagEl.className = 'diagnostic err';
+    }
+  }
+  diagEl.textContent = diag;
+}
+
+['vbase', 'dv', 'y0'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateRobust);
+});
+
+// ========================================================================
+// PRESET BUTTONS
+// ========================================================================
+function attachPresetListeners() {
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const vbase = parseFloat(btn.dataset.vbase);
+      const dv = parseFloat(btn.dataset.dv);
+      const y0 = parseFloat(btn.dataset.y0);
+      const preset = btn.dataset.preset || '';
+
+      if (isNaN(vbase) || isNaN(dv) || isNaN(y0)) {
+        showToast('Error', 'Datos del preset inválidos.', 'warn');
+        return;
+      }
+
+      btn.style.transform = 'scale(0.96)';
+      setTimeout(() => btn.style.transform = '', 180);
+
+      setRobustPreset(vbase, dv, y0, preset);
+    });
+  });
+}
+
+// ========================================================================
+// INIT ALL
+// ========================================================================
+function initAll() {
+  attachPresetListeners();
+
+  setTimeout(() => {
+    try { updateExplorer(); } catch(e) { console.warn('explorer', e); }
+    try { updateFixedPointsList(); } catch(e) { console.warn('fp list', e); }
+    try { updateFig3(); } catch(e) { console.warn('fig3', e); }
+    try { updateMultiNu(); } catch(e) { console.warn('multi nu', e); }
+    try { updateOptim(); } catch(e) { console.warn('optim', e); }
+    try { updateBifurcationGlobal(); } catch(e) { console.warn('bif global', e); }
+    try { updateRobust(); } catch(e) { console.warn('robust', e); }
+  }, 120);
+}
+
+</script>
+
+</body>
+</html>

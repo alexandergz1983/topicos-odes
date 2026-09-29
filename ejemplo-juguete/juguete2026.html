@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelado de Sistemas Biológicos · Tutorial Interactivo</title>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+
+<style>
+  :root {
+    --bg: #f5f8fc;
+    --card-bg: #ffffff;
+    --primary: #16324f;
+    --primary-hover: #1e4a72;
+    --accent: #22a06b;
+    --accent-light: #d1fae5;
+    --blue: #3b82f6;
+    --orange: #f59e0b;
+    --red: #dc2626;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+    min-height: 100vh;
+  }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar {
+    background: linear-gradient(165deg, #16324f 0%, #0a1e33 100%);
+    color: white;
+    padding: 2rem 1.25rem;
+    position: fixed;
+    top: 0; left: 0;
+    width: 300px;
+    height: 100vh;
+    overflow-y: auto;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    z-index: 100;
+  }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+  .sidebar-header {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 1.5rem;
+  }
+  .sidebar-header .badge {
+    display: inline-block;
+    background: rgba(34, 160, 107, 0.2);
+    color: #6ee7b7;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .sidebar-header h1 {
+    font-size: 20px; font-weight: 700; line-height: 1.3;
+    margin-bottom: 6px; letter-spacing: -0.3px;
+  }
+  .sidebar-header p {
+    font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.5;
+  }
+  .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 14px; font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .nav-link:hover { background: rgba(255,255,255,0.06); color: white; }
+  .nav-link.active { background: rgba(34, 160, 107, 0.18); color: white; }
+  .nav-link.active::before {
+    content: ''; position: absolute; left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 20px;
+    background: var(--accent); border-radius: 0 3px 3px 0;
+  }
+  .nav-number {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .nav-link.active .nav-number { background: var(--accent); color: white; }
+
+  /* ============ MAIN ============ */
+  .main {
+    margin-left: 300px;
+    padding: 3rem 4rem 6rem 5rem;
+    max-width: 1200px;
+  }
+  .hero {
+    margin-bottom: 3.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 38px; font-weight: 800; letter-spacing: -0.8px;
+    color: var(--primary); line-height: 1.15; margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 17px; color: var(--text-light); max-width: 720px; line-height: 1.7;
+  }
+
+  /* ============ STEPS ============ */
+  .step { margin-bottom: 4rem; scroll-margin-top: 2rem; }
+  .step-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 1.5rem; padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .step-badge {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white; border-radius: var(--radius-sm);
+    font-weight: 800; font-size: 18px; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(22, 50, 79, 0.25);
+  }
+  .step-header h2 {
+    font-size: 24px; font-weight: 700; color: var(--primary);
+    letter-spacing: -0.4px;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+  }
+  .card p { color: var(--text); margin-bottom: 0.75rem; }
+  .card p:last-child { margin-bottom: 0; }
+  .card h3 {
+    font-size: 15px; font-weight: 700; color: var(--primary);
+    margin-bottom: 0.75rem; display: flex; align-items: center; gap: 8px;
+  }
+  .card h3::before {
+    content: ''; width: 4px; height: 16px;
+    background: var(--accent); border-radius: 2px;
+  }
+  .card ul { padding-left: 1.25rem; margin: 0.5rem 0; }
+  .card ul li { margin-bottom: 6px; }
+
+  .note {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-left: 4px solid var(--orange);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1rem 0; font-size: 14.5px;
+  }
+  .note strong { color: #92400e; }
+  .tip {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-left: 4px solid var(--accent);
+    padding: 1rem 1.25rem;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin: 1rem 0; font-size: 14.5px;
+  }
+  .tip strong { color: #065f46; }
+
+  .math-box {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+  .math-box .mjx-container { font-size: 110% !important; }
+
+  /* ============ SLIDERS ============ */
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .slider-row { display: flex; flex-direction: column; gap: 6px; }
+  .slider-row .label-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13.5px;
+  }
+  .slider-row label { font-weight: 600; color: var(--primary); }
+  .slider-value {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 12.5px; color: var(--accent); font-weight: 700;
+    background: var(--accent-light); padding: 2px 8px; border-radius: 4px;
+  }
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px; border-radius: 3px;
+    background: #e2e8f0; outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); cursor: pointer;
+    box-shadow: 0 2px 6px rgba(34, 160, 107, 0.4);
+    transition: transform 0.15s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: none;
+    box-shadow: 0 2px 6px rgba(34, 160, 107, 0.4);
+  }
+
+  /* ============ PLOTS ============ */
+  .plot-container {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    min-height: 400px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ============ METRICS ============ */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+  .metric {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .metric:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .metric::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .metric.m-blue::before { background: var(--blue); }
+  .metric.m-orange::before { background: var(--orange); }
+  .metric.m-green::before { background: var(--accent); }
+  .metric .metric-label {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px;
+  }
+  .metric .metric-value {
+    font-size: 26px; font-weight: 800; color: var(--primary);
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    letter-spacing: -0.5px;
+  }
+
+  /* ============ DIAGRAM ============ */
+  .diagram-wrap {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+  }
+  .diagram-wrap svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1024px) {
+    .sidebar {
+      position: static;
+      width: 100%; height: auto;
+      padding: 1.25rem 1rem;
+    }
+    .nav-list { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+    .nav-link { padding: 6px 10px; font-size: 12px; }
+    .nav-number { width: 18px; height: 18px; font-size: 10px; }
+    .main { margin-left: 0; padding: 2rem 1.5rem 4rem; }
+    .hero h1 { font-size: 28px; }
+    .controls { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 24px; }
+    .step-header h2 { font-size: 18px; }
+    .step-badge { width: 36px; height: 36px; font-size: 15px; }
+    .main { padding: 1.5rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <span class="badge">Tutorial Interactivo</span>
+    <h1>Modelado de Sistemas Biológicos</h1>
+    <p>J. Alexander Garcia Zea: PhD en Biologia Fundamental y de Sistemas. MSc en Genetica y Evolucion. Construcción de un modelo de EDOs no lineales desde cero</p>
+  </div>
+  <ul class="nav-list">
+    <li><a href="#step1" class="nav-link"><span class="nav-number">1</span> Red de Reacciones</a></li>
+    <li><a href="#step2" class="nav-link"><span class="nav-number">2</span> Matemáticas</a></li>
+    <li><a href="#step3" class="nav-link"><span class="nav-number">3</span> Conservación</a></li>
+    <li><a href="#step4" class="nav-link"><span class="nav-number">4</span> Parámetros</a></li>
+    <li><a href="#step5" class="nav-link"><span class="nav-number">5</span> Estado Estacionario</a></li>
+    <li><a href="#step6" class="nav-link"><span class="nav-number">6</span> Simulación</a></li>
+    <li><a href="#step7" class="nav-link"><span class="nav-number">7</span> Optimización</a></li>
+    <li><a href="#step8" class="nav-link"><span class="nav-number">8</span> Robustez</a></li>
+  </ul>
+</aside>
+
+<!-- ================= MAIN ================= -->
+<main class="main">
+
+  <section class="hero">
+    <h1>Del diagrama a las ecuaciones, y de las ecuaciones a la simulación</h1>
+    <p>Un recorrido guiado por los 8 pasos fundamentales para construir, analizar y validar un modelo mecanístico de EDOs no lineales aplicado a una red de señalización biológica.</p>
+  </section>
+
+  <!-- ========== STEP 1 ========== -->
+  <section class="step" id="step1">
+    <div class="step-header">
+      <div class="step-badge">1</div>
+      <h2>Representaciones Visuales de Redes de Reacción</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>Antes de escribir una sola línea de matemáticas, necesitamos entender la biología. Observamos un <strong>modelo de juguete</strong> que representa una red de reacciones donde una proteína $X$ se produce, se degrada y se une a una proteína $Y$ para formar un dímero $XY$.</p>
+    </div>
+
+    <!-- DIAGRAMA SVG ACTUALIZADO Y COMPLETO -->
+  
+    <div class="diagram-wrap">
+      <img src="img-juguete.png" alt="Diagrama de red de reacciones" style="display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 8px;">
+    </div>
+
+    <div class="card">
+      <h3>Interpretación Biológica</h3>
+      <ul>
+        <li><strong>Sustrato $X_{pre}$:</strong> material de partida disponible para producir la proteína $X$.</li>
+        <li><strong>Proteína $X$:</strong> se produce ($R1$) y se degrada ($R2$). Su concentración depende del balance entre ambas.</li>
+        <li><strong>Proteína $Y$:</strong> se une a $X$ para formar el dímero $XY$.</li>
+        <li><strong>Dímero $XY$:</strong> producto de la unión de $X$ e $Y$. Puede disociarse ($R3-$) y volver a sus componentes.</li>
+        <li><strong>Moduladores (cuadros azules):</strong> $E_{prod}$, $E_{deg}$, $E_{dim}$ y $E_{dis}$ actúan como "perillas" enzimáticas que aceleran o frenan las reacciones (rombos verdes $R1$, $R2$, $R3$).</li>
+      </ul>
+      <div class="tip">
+        <strong>💡 Guía para el estudiante:</strong> Observa el diagrama. Cada flecha es una reacción. Los rombos verdes son las velocidades de reacción. Antes de resolver matemáticamente, pregúntate: <em>¿qué pasa con la cantidad de $X$ si aumento $E_{prod}$? ¿Qué pasa con $Y$ si $X$ se une mucho a ella?</em>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== STEP 2 ========== -->
+  <section class="step" id="step2">
+    <div class="step-header">
+      <div class="step-badge">2</div>
+      <h2>Representación Matemática del Sistema</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>Traducimos el diagrama de la red a un lenguaje que las computadoras entiendan: <strong>Ecuaciones Diferenciales Ordinarias (EDOs)</strong>.</p>
+    </div>
+    <div class="card">
+      <h3>Ley de Acción de Masas</h3>
+      <p>La tasa de cambio de cada especie es igual a la suma de sus reacciones de formación menos las de consumo. Aplicando esto a $X$, $Y$ y $XY$ obtenemos:</p>
+      <div class="math-box">
+        $$\frac{dX(t)}{dt} = \underbrace{X_{pre}\,k_{prod}\,E_{prod}}_{\text{producción}} - \underbrace{X(t)\,k_{deg}\,E_{deg}}_{\text{degradación}} - \underbrace{X(t)Y(t)\,k_{dim}\,E_{dim}}_{\text{dimerización}} + \underbrace{XY(t)\,k_{dis}\,E_{dis}}_{\text{disociación}}$$
+        $$\frac{dY(t)}{dt} = -X(t)Y(t)\,k_{dim}\,E_{dim} + XY(t)\,k_{dis}\,E_{dis}$$
+        $$\frac{dXY(t)}{dt} = X(t)Y(t)\,k_{dim}\,E_{dim} - XY(t)\,k_{dis}\,E_{dis}$$
+      </div>
+    </div>
+    <div class="card">
+      <h3>Interpretación Matemática</h3>
+      <p>Fíjate en los signos. Cada término positivo representa una flecha que <em>entra</em> al nodo, y cada término negativo una flecha que <em>sale</em>. La constante $k$ indica la velocidad intrínseca de la reacción, y $E$ indica la modulación externa.</p>
+      <div class="note">
+        <strong>📌 Nota:</strong> Observa cómo los cuadrados azules ($E_{prod}, E_{deg}, \dots$) actúan como <strong>moduladores constantes</strong> sobre las reacciones (rombos verdes). En este modelo los tratamos como parámetros, no como variables de estado.
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== STEP 3 ========== -->
+  <section class="step" id="step3">
+    <div class="step-header">
+      <div class="step-badge">3</div>
+      <h2>Simplificación del Modelo: Ecuaciones de Conservación</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>En biología muchas moléculas no se destruyen, solo cambian de estado. El sistema original tiene 3 ecuaciones ($X$, $Y$, $XY$), pero podemos reducirlo a 2 usando una <strong>ley de conservación</strong>. Menos ecuaciones significa computación más rápida y menos errores numéricos.</p>
+    </div>
+    <div class="card">
+      <h3>Derivación de la Conservación</h3>
+      <p>La cantidad total de proteína $Y$ es constante: existe como $Y$ libre o unida al dímero $XY$. Por lo tanto:</p>
+      <div class="math-box">
+        $$Y_T = Y(t) + XY(t) = \text{constante}$$
+        $$\frac{dY_T}{dt} = \frac{dY(t)}{dt} + \frac{dXY(t)}{dt} = 0$$
+      </div>
+      <p>Sustituyendo $XY(t) = Y_T - Y(t)$ en las ecuaciones originales, reducimos el sistema de 3D a 2D:</p>
+      <div class="math-box">
+        $$\frac{dX(t)}{dt} = X_{pre}\,k_{prod}\,E_{prod} - X(t)\,k_{deg}\,E_{deg} - X(t)Y(t)\,k_{dim}\,E_{dim} + \big(Y_T - Y(t)\big)k_{dis}\,E_{dis}$$
+        $$\frac{dY(t)}{dt} = -X(t)Y(t)\,k_{dim}\,E_{dim} + \big(Y_T - Y(t)\big)k_{dis}\,E_{dis}$$
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row">
+          <label>$Y_T$ (total de proteína Y)</label>
+          <span class="slider-value" id="s3-YT-val">100</span>
+        </div>
+        <input type="range" id="s3-YT" min="20" max="300" step="10" value="100">
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step3"></div>
+    <div class="tip" style="margin-top:1rem;">
+      <strong>💡 Guía:</strong> Mueve el slider de $Y_T$. Observa cómo la línea negra punteada (la suma $Y(t)+XY(t)$) se mantiene completamente plana sin importar el tiempo. <strong>La materia no se crea ni se destruye, solo se transforma.</strong>
+    </div>
+  </section>
+
+  <!-- ========== STEP 4 ========== -->
+  <section class="step" id="step4">
+    <div class="step-header">
+      <div class="step-badge">4</div>
+      <h2>Identificación de Condiciones Iniciales y Parámetros</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>Para que un modelo funcione necesitamos darle un punto de partida (<strong>condiciones iniciales</strong>) y definir las reglas de velocidad (<strong>parámetros</strong>).</p>
+    </div>
+    <div class="card">
+      <h3>Interpretación Biológica y Matemática</h3>
+      <ul>
+        <li><strong>Condiciones iniciales ($X_0, Y_0$):</strong> ¿cuánta proteína $X$ y $Y$ hay en $t=0$? Matemáticamente: $X(0)=X_0$, $Y(0)=Y_0$.</li>
+        <li><strong>Parámetros ($k$ y $E$):</strong> valores numéricos que definen qué tan rápido ocurren las reacciones. En un experimento real, se miden o estiman. Por ejemplo, $k_{prod}$ es la tasa base de producción, mientras que $E_{prod}$ es el nivel de modulación (ej. presencia de un factor de transcripción).</li>
+      </ul>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$X_{pre}$</label><span class="slider-value" id="s4-Xpre-val">10</span></div>
+        <input type="range" id="s4-Xpre" min="1" max="50" step="1" value="10">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{prod}$</label><span class="slider-value" id="s4-kprod-val">1.0</span></div>
+        <input type="range" id="s4-kprod" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_{prod}$</label><span class="slider-value" id="s4-Eprod-val">1.0</span></div>
+        <input type="range" id="s4-Eprod" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{deg}$</label><span class="slider-value" id="s4-kdeg-val">0.5</span></div>
+        <input type="range" id="s4-kdeg" min="0.1" max="5" step="0.1" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_{deg}$</label><span class="slider-value" id="s4-Edeg-val">1.0</span></div>
+        <input type="range" id="s4-Edeg" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{dim}$</label><span class="slider-value" id="s4-kdim-val">0.10</span></div>
+        <input type="range" id="s4-kdim" min="0.01" max="1" step="0.01" value="0.1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_{dim}$</label><span class="slider-value" id="s4-Edim-val">1.0</span></div>
+        <input type="range" id="s4-Edim" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{dis}$</label><span class="slider-value" id="s4-kdis-val">0.05</span></div>
+        <input type="range" id="s4-kdis" min="0.01" max="1" step="0.01" value="0.05">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_{dis}$</label><span class="slider-value" id="s4-Edis-val">1.0</span></div>
+        <input type="range" id="s4-Edis" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$Y_T$</label><span class="slider-value" id="s4-YT-val">100</span></div>
+        <input type="range" id="s4-YT" min="20" max="300" step="10" value="100">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Valores actuales del sistema</h3>
+      <div class="math-box" style="font-family:'JetBrains Mono', monospace; font-size:13px;">
+        <div>Xpre = <span id="s4-show-Xpre">10</span>, kprod = <span id="s4-show-kprod">1.0</span>, Eprod = <span id="s4-show-Eprod">1.0</span></div>
+        <div>kdeg = <span id="s4-show-kdeg">0.5</span>, Edeg = <span id="s4-show-Edeg">1.0</span></div>
+        <div>kdim = <span id="s4-show-kdim">0.10</span>, Edim = <span id="s4-show-Edim">1.0</span></div>
+        <div>kdis = <span id="s4-show-kdis">0.05</span>, Edis = <span id="s4-show-Edis">1.0</span></div>
+        <div>YT = <span id="s4-show-YT">100</span></div>
+      </div>
+      <div class="tip">
+        <strong>💡 Guía:</strong> Si aumentas $E_{deg}$ (la enzima que degrada $X$), ¿qué crees que le pasará a la concentración de $X$? Aún no simulamos, pero usa tu intuición biológica.
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== STEP 5 ========== -->
+  <section class="step" id="step5">
+    <div class="step-header">
+      <div class="step-badge">5</div>
+      <h2>Comportamiento de Equilibrio: Estado Estacionario</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>Buscamos el "destino final" del sistema. El estado estacionario ocurre cuando el sistema se estabiliza y las concentraciones ya no cambian con el tiempo.</p>
+    </div>
+    <div class="card">
+      <h3>Derivación analítica</h3>
+      <p>Igualamos las derivadas a cero: $\frac{dX}{dt}=0$ y $\frac{dY}{dt}=0$. Resolviendo el álgebra:</p>
+      <div class="math-box">
+        $$X^* = \frac{X_{pre}\,k_{prod}\,E_{prod}}{k_{deg}\,E_{deg}}$$
+        $$Y^* = \frac{Y_T\,k_{dis}\,E_{dis}}{X^*\,k_{dim}\,E_{dim} + k_{dis}\,E_{dis}}$$
+        $$XY^* = Y_T - Y^*$$
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$X_{pre}$</label><span class="slider-value" id="s5-Xpre-val">10</span></div>
+        <input type="range" id="s5-Xpre" min="1" max="50" step="1" value="10">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{prod}$</label><span class="slider-value" id="s5-kprod-val">1.0</span></div>
+        <input type="range" id="s5-kprod" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_{prod}$</label><span class="slider-value" id="s5-Eprod-val">1.0</span></div>
+        <input type="range" id="s5-Eprod" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{deg}$</label><span class="slider-value" id="s5-kdeg-val">0.5</span></div>
+        <input type="range" id="s5-kdeg" min="0.1" max="5" step="0.1" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$E_{deg}$</label><span class="slider-value" id="s5-Edeg-val">1.0</span></div>
+        <input type="range" id="s5-Edeg" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{dim}$</label><span class="slider-value" id="s5-kdim-val">0.10</span></div>
+        <input type="range" id="s5-kdim" min="0.01" max="1" step="0.01" value="0.1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{dis}$</label><span class="slider-value" id="s5-kdis-val">0.05</span></div>
+        <input type="range" id="s5-kdis" min="0.01" max="1" step="0.01" value="0.05">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$Y_T$</label><span class="slider-value" id="s5-YT-val">100</span></div>
+        <input type="range" id="s5-YT" min="20" max="300" step="10" value="100">
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric m-blue">
+        <div class="metric-label">X*</div>
+        <div class="metric-value" id="s5-X-eq">20.00</div>
+      </div>
+      <div class="metric m-orange">
+        <div class="metric-label">Y*</div>
+        <div class="metric-value" id="s5-Y-eq">2.44</div>
+      </div>
+      <div class="metric m-green">
+        <div class="metric-label">XY*</div>
+        <div class="metric-value" id="s5-XY-eq">97.56</div>
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step5" style="margin-top:1.25rem;"></div>
+    <div class="tip" style="margin-top:1rem;">
+      <strong>💡 Guía:</strong> ¿Qué pasa con $X^*$ si aumentas $k_{prod}$? (Aumenta proporcionalmente). ¿Qué pasa con $Y^*$ si aumentas $X^*$? (Disminuye, porque más $X$ libre atrapa a la $Y$ para formar dímero).
+    </div>
+  </section>
+
+  <!-- ========== STEP 6 ========== -->
+  <section class="step" id="step6">
+    <div class="step-header">
+      <div class="step-badge">6</div>
+      <h2>Simulación Dinámica del Sistema de EDOs</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>El estado estacionario nos dice <em>a dónde</em> vamos, pero la simulación dinámica nos dice <em>cómo</em> llegamos allí. Resolvemos las EDOs numéricamente usando el método <strong>Runge-Kutta de 4to orden (RK4)</strong>.</p>
+    </div>
+    <div class="card">
+      <h3>Interpretación Computacional</h3>
+      <p>La computadora divide el tiempo en pequeños pasos y calcula cómo cambian $X$, $Y$ y $XY$ en cada paso. Esto genera las curvas de concentración vs tiempo.</p>
+      <div class="math-box">
+        $$X(t+\Delta t) \approx X(t) + \tfrac{\Delta t}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$
+        <p style="text-align:center; color:var(--text-light); font-size:13px; margin-top:0.5rem;">donde cada $k_i$ es una evaluación de la función derivada en puntos estratégicos del intervalo.</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{prod}$</label><span class="slider-value" id="s6-kprod-val">1.0</span></div>
+        <input type="range" id="s6-kprod" min="0.1" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{deg}$</label><span class="slider-value" id="s6-kdeg-val">0.5</span></div>
+        <input type="range" id="s6-kdeg" min="0.1" max="5" step="0.1" value="0.5">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{dim}$</label><span class="slider-value" id="s6-kdim-val">0.10</span></div>
+        <input type="range" id="s6-kdim" min="0.01" max="1" step="0.01" value="0.1">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{dis}$</label><span class="slider-value" id="s6-kdis-val">0.05</span></div>
+        <input type="range" id="s6-kdis" min="0.01" max="1" step="0.01" value="0.05">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$Y_T$</label><span class="slider-value" id="s6-YT-val">100</span></div>
+        <input type="range" id="s6-YT" min="20" max="300" step="10" value="100">
+      </div>
+      <div class="slider-row">
+        <div class="label-row"><label>$X_0$ (inicial)</label><span class="slider-value" id="s6-X0-val">0</span></div>
+        <input type="range" id="s6-X0" min="0" max="50" step="1" value="0">
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step6"></div>
+    <div class="tip" style="margin-top:1rem;">
+      <strong>💡 Guía:</strong> Compara las curvas dinámicas con las barras del Paso 5. ¿Las curvas se estabilizan en los mismos valores que predijo el estado estacionario? Prueba cambiar $k_{prod}$ y $k_{deg}$ y observa el cambio en la pendiente inicial.
+    </div>
+  </section>
+
+  <!-- ========== STEP 7 ========== -->
+  <section class="step" id="step7">
+    <div class="step-header">
+      <div class="step-badge">7</div>
+      <h2>Optimización de Parámetros</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>En la vida real no conocemos los valores exactos de $k_{prod}$ o $k_{deg}$. Lo que tenemos son <strong>datos experimentales</strong> (puntos rojos con ruido). La optimización busca los parámetros que hacen que nuestro modelo se ajuste mejor a esos datos.</p>
+    </div>
+    <div class="card">
+      <h3>Interpretación Matemática</h3>
+      <p>Definimos una función de costo: el <strong>Error Cuadrático</strong> (SSE), que mide la distancia entre los datos experimentales y la predicción del modelo:</p>
+      <div class="math-box">
+        $$SSE = \sum_{i=1}^{N} \big(X_{exp,i} - X_{model,i}\big)^2$$
+        <p style="text-align:center; color:var(--text-light); font-size:13px; margin-top:0.5rem;">Objetivo: $\displaystyle \min_{k_{prod}} SSE$</p>
+      </div>
+      <p>En este tutorial simulamos ese proceso <em>manualmente</em>: los datos fueron generados con $k_{prod}=2.0$ más ruido gaussiano. Tu trabajo es encontrar el valor óptimo moviendo el slider.</p>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>$k_{prod}$ (ajustable)</label><span class="slider-value" id="s7-kprod-val">1.0</span></div>
+        <input type="range" id="s7-kprod" min="0.1" max="5" step="0.05" value="2">
+      </div>
+    </div>
+
+    <div class="metrics" style="grid-template-columns:1fr;">
+      <div class="metric m-orange">
+        <div class="metric-label">Error Cuadrático Total (SSE)</div>
+        <div class="metric-value" id="s7-sse">—</div>
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step7" style="margin-top:1.25rem;"></div>
+    <div class="tip" style="margin-top:1rem;">
+      <strong>💡 Guía:</strong> Mueve el slider para hacer que la línea azul (modelo) pase lo más cerca posible de los puntos rojos. Fíjate en el valor de SSE: <em>¿cuál es el $k_{prod}$ que da el error más bajo?</em> (Pista: el valor real es 2.0).
+    </div>
+  </section>
+
+  <!-- ========== STEP 8 ========== -->
+  <section class="step" id="step8">
+    <div class="step-header">
+      <div class="step-badge">8</div>
+      <h2>Análisis del Modelo: Robustez / Plasticidad</h2>
+    </div>
+    <div class="card">
+      <h3>¿Qué estamos haciendo?</h3>
+      <p>Un modelo no sirve de mucho si solo funciona en condiciones perfectas. El análisis de robustez evalúa qué tan sensible es el sistema a perturbaciones externas.</p>
+    </div>
+    <div class="card">
+      <h3>Interpretación Biológica y Matemática</h3>
+      <p>Si una célula muta y produce más enzima $E_{prod}$, ¿el sistema colapsa o se adapta? La robustez mide la capacidad del sistema para mantener su función frente a cambios. Matemáticamente evaluamos cómo cambia el estado estacionario $X^*$ cuando perturbamos un parámetro $p$:</p>
+      <div class="math-box">
+        $$\text{Sensibilidad} \approx \frac{\Delta X^* / X^*}{\Delta p / p}$$
+      </div>
+      <p>Un valor de sensibilidad cercano a 1 indica una respuesta proporcional; cercano a 0 indica un sistema robusto.</p>
+    </div>
+
+    <div class="controls">
+      <div class="slider-row">
+        <div class="label-row"><label>Factor multiplicador de $E_{prod}$</label><span class="slider-value" id="s8-factor-val">1.00</span></div>
+        <input type="range" id="s8-factor" min="0.1" max="3" step="0.05" value="1">
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric m-blue">
+        <div class="metric-label">X* Nominal</div>
+        <div class="metric-value" id="s8-X-nom">20.00</div>
+      </div>
+      <div class="metric m-orange">
+        <div class="metric-label">X* Perturbado</div>
+        <div class="metric-value" id="s8-X-pert">20.00</div>
+      </div>
+      <div class="metric m-green">
+        <div class="metric-label">Cambio relativo</div>
+        <div class="metric-value" id="s8-delta">0.00 %</div>
+      </div>
+    </div>
+
+    <div class="plot-container" id="plot-step8" style="margin-top:1.25rem;"></div>
+    <div class="tip" style="margin-top:1rem;">
+      <strong>💡 Guía:</strong> Perturba $E_{prod}$. ¿El sistema es muy sensible o robusto? Compara con lo que ocurriría si perturbaras $k_{deg}$: <em>¿cuál de los dos hace al sistema más sensible?</em>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============================================================
+   MOTOR DE SIMULACIÓN — Runge-Kutta 4to orden
+   ============================================================ */
+const Solver = {
+  rk4(f, y0, t0, t1, dt) {
+    const n = Math.ceil((t1 - t0) / dt);
+    const t = new Array(n + 1);
+    const y = y0.map(() => new Array(n + 1));
+    t[0] = t0;
+    y0.forEach((v, j) => y[j][0] = v);
+    for (let i = 0; i < n; i++) {
+      const ti = t[i];
+      const yi = y.map(arr => arr[i]);
+      const k1 = f(ti, yi);
+      const k2 = f(ti + dt/2, yi.map((v, j) => v + dt/2 * k1[j]));
+      const k3 = f(ti + dt/2, yi.map((v, j) => v + dt/2 * k2[j]));
+      const k4 = f(ti + dt, yi.map((v, j) => v + dt * k3[j]));
+      y.forEach((arr, j) => {
+        arr[i + 1] = yi[j] + dt/6 * (k1[j] + 2*k2[j] + 2*k3[j] + k4[j]);
+      });
+      t[i + 1] = ti + dt;
+    }
+    return { t, y };
+  },
+  system2D(p) {
+    return (t, [X, Y]) => [
+      p.Xpre * p.kprod * p.Eprod - X * p.kdeg * p.Edeg - X * Y * p.kdim * p.Edim + (p.YT - Y) * p.kdis * p.Edis,
+      -X * Y * p.kdim * p.Edim + (p.YT - Y) * p.kdis * p.Edis
+    ];
+  }
+};
+
+/* ============================================================
+   ESTILO PLOTLY
+   ============================================================ */
+const PLOT_STYLE = {
+  font: { family: 'Inter, sans-serif', size: 13, color: '#1f2937' },
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: '#fafbfc',
+  margin: { l: 65, r: 30, t: 50, b: 55 },
+  xaxis: { gridcolor: '#e5e7eb', zerolinecolor: '#cbd5e1', linecolor: '#cbd5e1' },
+  yaxis: { gridcolor: '#e5e7eb', zerolinecolor: '#cbd5e1', linecolor: '#cbd5e1' },
+  legend: { orientation: 'h', x: 0, y: -0.2, bgcolor: 'rgba(255,255,255,0)' },
+  showlegend: true
+};
+const PLOT_CONFIG = { responsive: true, displayModeBar: false, displaylogo: false };
+
+function plot(id, traces, layout) {
+  Plotly.react(id, traces, Object.assign({}, PLOT_STYLE, layout), PLOT_CONFIG);
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
+function sv(id) { return parseFloat(document.getElementById(id).value); }
+function updateLabel(id, val, decimals = 1) {
+  const el = document.getElementById(id + '-val');
+  if (el) el.textContent = val.toFixed(decimals);
+}
+
+/* ============================================================
+   PASO 3
+   ============================================================ */
+function updateStep3() {
+  const YT = sv('s3-YT');
+  updateLabel('s3-YT', YT, 0);
+
+  const p = { Xpre: 10, kprod: 1, Eprod: 1, kdeg: 0.5, Edeg: 1, kdim: 0.1, Edim: 1, kdis: 0.05, Edis: 1, YT };
+  const sol = Solver.rk4(Solver.system2D(p), [0, YT], 0, 40, 0.05);
+
+  const t = sol.t;
+  const X = sol.y[0];
+  const Y = sol.y[1];
+  const XY = t.map((_, i) => YT - Y[i]);
+  const suma = t.map((_, i) => Y[i] + XY[i]);
+
+  plot('plot-step3', [
+    { x: t, y: X,  name: 'X(t)',  line: { color: '#3b82f6', width: 2.5 } },
+    { x: t, y: Y,  name: 'Y(t)',  line: { color: '#f59e0b', width: 2.5 } },
+    { x: t, y: XY, name: 'XY(t)', line: { color: '#22a06b', width: 2.5 } },
+    { x: t, y: suma, name: 'Y + XY = Y_T', line: { color: '#334155', width: 2, dash: 'dash' } }
+  ], {
+    title: { text: `Verificación de la conservación con Y_T = ${YT}`, font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'Tiempo' },
+    yaxis: { title: 'Concentración' },
+    height: 420
+  });
+}
+
+/* ============================================================
+   PASO 4
+   ============================================================ */
+function updateStep4() {
+  const keys = ['Xpre', 'kprod', 'Eprod', 'kdeg', 'Edeg', 'kdim', 'Edim', 'kdis', 'Edis', 'YT'];
+  const decs = [0, 1, 1, 1, 1, 2, 1, 2, 1, 0];
+  keys.forEach((k, i) => {
+    const val = sv('s4-' + k);
+    updateLabel('s4-' + k, val, decs[i]);
+    const el = document.getElementById('s4-show-' + k);
+    if (el) el.textContent = val.toFixed(decs[i]);
+  });
+}
+
+/* ============================================================
+   PASO 5
+   ============================================================ */
+function updateStep5() {
+  const keys = ['Xpre', 'kprod', 'Eprod', 'kdeg', 'Edeg', 'kdim', 'kdis', 'YT'];
+  const decs = [0, 1, 1, 1, 1, 2, 2, 0];
+  keys.forEach((k, i) => updateLabel('s5-' + k, sv('s5-' + k), decs[i]));
+
+  const Xpre = sv('s5-Xpre'), kprod = sv('s5-kprod'), Eprod = sv('s5-Eprod');
+  const kdeg = sv('s5-kdeg'), Edeg = sv('s5-Edeg');
+  const kdim = sv('s5-kdim'), kdis = sv('s5-kdis'), YT = sv('s5-YT');
+
+  const Xeq = (Xpre * kprod * Eprod) / (kdeg * Edeg);
+  const Yeq = (YT * kdis) / (Xeq * kdim + kdis);
+  const XYeq = YT - Yeq;
+
+  document.getElementById('s5-X-eq').textContent = Xeq.toFixed(2);
+  document.getElementById('s5-Y-eq').textContent = Yeq.toFixed(2);
+  document.getElementById('s5-XY-eq').textContent = XYeq.toFixed(2);
+
+  plot('plot-step5', [{
+    x: ['X*', 'Y*', 'XY*'],
+    y: [Xeq, Yeq, XYeq],
+    type: 'bar',
+    marker: { color: ['#3b82f6', '#f59e0b', '#22a06b'] },
+    text: [Xeq.toFixed(2), Yeq.toFixed(2), XYeq.toFixed(2)],
+    textposition: 'outside',
+    textfont: { size: 14, weight: 'bold' },
+    width: 0.5
+  }], {
+    title: { text: 'Concentraciones en Estado Estacionario', font: { size: 14, color: '#16324f' } },
+    yaxis: { title: 'Concentración' },
+    showlegend: false,
+    height: 380
+  });
+}
+
+/* ============================================================
+   PASO 6
+   ============================================================ */
+function updateStep6() {
+  const keys = ['kprod', 'kdeg', 'kdim', 'kdis', 'YT', 'X0'];
+  const decs = [1, 1, 2, 2, 0, 0];
+  keys.forEach((k, i) => updateLabel('s6-' + k, sv('s6-' + k), decs[i]));
+
+  const p = {
+    Xpre: 10, kprod: sv('s6-kprod'), Eprod: 1,
+    kdeg: sv('s6-kdeg'), Edeg: 1,
+    kdim: sv('s6-kdim'), Edim: 1,
+    kdis: sv('s6-kdis'), Edis: 1,
+    YT: sv('s6-YT')
+  };
+  const X0 = sv('s6-X0');
+
+  const sol = Solver.rk4(Solver.system2D(p), [X0, p.YT], 0, 50, 0.05);
+  const t = sol.t;
+  const X = sol.y[0];
+  const Y = sol.y[1];
+  const XY = t.map((_, i) => p.YT - Y[i]);
+
+  plot('plot-step6', [
+    { x: t, y: X,  name: 'X(t)',  line: { color: '#3b82f6', width: 2.5 } },
+    { x: t, y: Y,  name: 'Y(t)',  line: { color: '#f59e0b', width: 2.5 } },
+    { x: t, y: XY, name: 'XY(t)', line: { color: '#22a06b', width: 2.5 } }
+  ], {
+    title: { text: 'Simulación dinámica del sistema de EDOs', font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'Tiempo' },
+    yaxis: { title: 'Concentración' },
+    height: 420
+  });
+}
+
+/* ============================================================
+   PASO 7 — Datos experimentales sintéticos
+   ============================================================ */
+const EXP_DATA = (function() {
+  const p = { Xpre: 10, kprod: 2.0, Eprod: 1, kdeg: 0.5, Edeg: 1, kdim: 0.1, Edim: 1, kdis: 0.05, Edis: 1, YT: 100 };
+  const sol = Solver.rk4(Solver.system2D(p), [0, p.YT], 0, 30, 0.05);
+  const nSamples = 15;
+  const idxs = [];
+  for (let i = 0; i < nSamples; i++) idxs.push(Math.floor(i * (sol.t.length - 1) / (nSamples - 1)));
+
+  let seed = 42;
+  const rand = () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; };
+  const gauss = () => {
+    const u1 = rand(), u2 = rand();
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  };
+
+  const t = idxs.map(i => sol.t[i]);
+  const X_clean = idxs.map(i => sol.y[0][i]);
+  const X_noisy = X_clean.map(v => v + gauss() * 1.5);
+
+  return { t, X_clean, X_noisy };
+})();
+
+function updateStep7() {
+  const kprod = sv('s7-kprod');
+  updateLabel('s7-kprod', kprod, 2);
+
+  const p = {
+    Xpre: 10, kprod: kprod, Eprod: 1,
+    kdeg: 0.5, Edeg: 1, kdim: 0.1, Edim: 1,
+    kdis: 0.05, Edis: 1, YT: 100
+  };
+
+  const sol = Solver.rk4(Solver.system2D(p), [0, p.YT], 0, 30, 0.05);
+  const model = EXP_DATA.t.map(tt => {
+    const idx = Math.min(Math.round(tt / 0.05), sol.y[0].length - 1);
+    return sol.y[0][idx];
+  });
+
+  let sse = 0;
+  EXP_DATA.t.forEach((_, i) => { sse += Math.pow(EXP_DATA.X_noisy[i] - model[i], 2); });
+  document.getElementById('s7-sse').textContent = sse.toFixed(2);
+
+  const solFull = Solver.rk4(Solver.system2D(p), [0, p.YT], 0, 30, 0.1);
+
+  plot('plot-step7', [
+    {
+      x: EXP_DATA.t, y: EXP_DATA.X_noisy,
+      mode: 'markers', name: 'Datos experimentales (con ruido)',
+      marker: { color: '#dc2626', size: 10, line: { color: 'white', width: 1 } }
+    },
+    {
+      x: solFull.t, y: solFull.y[0],
+      mode: 'lines', name: `Modelo (k_prod = ${kprod.toFixed(2)})`,
+      line: { color: '#3b82f6', width: 2.5 }
+    }
+  ], {
+    title: { text: `SSE = ${sse.toFixed(2)}   |   Objetivo: minimizar esta suma`, font: { size: 14, color: '#16324f' } },
+    xaxis: { title: 'Tiempo' },
+    yaxis: { title: 'Concentración X' },
+    height: 420
+  });
+}
+
+/* ============================================================
+   PASO 8
+   ============================================================ */
+function updateStep8() {
+  const factor = sv('s8-factor');
+  updateLabel('s8-factor', factor, 2);
+
+  const Xpre = 10, kprod = 1, kdeg = 0.5, Edeg = 1;
+  const X_nom  = (Xpre * kprod * 1.0) / (kdeg * Edeg);
+  const X_pert = (Xpre * kprod * factor) / (kdeg * Edeg);
+  const delta = ((X_pert - X_nom) / X_nom) * 100;
+
+  document.getElementById('s8-X-nom').textContent  = X_nom.toFixed(2);
+  document.getElementById('s8-X-pert').textContent = X_pert.toFixed(2);
+  const deltaEl = document.getElementById('s8-delta');
+  deltaEl.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(2) + ' %';
+  if (Math.abs(delta) > 50) deltaEl.style.color = '#dc2626';
+  else if (Math.abs(delta) > 15) deltaEl.style.color = '#f59e0b';
+  else deltaEl.style.color = '#22a06b';
+
+  plot('plot-step8', [{
+    x: ['Nominal', 'Perturbado'],
+    y: [X_nom, X_pert],
+    type: 'bar',
+    marker: { color: ['#3b82f6', factor > 1 ? '#f59e0b' : '#22a06b'] },
+    text: [X_nom.toFixed(2), X_pert.toFixed(2)],
+    textposition: 'outside',
+    textfont: { size: 14, weight: 'bold' },
+    width: 0.5
+  }], {
+    title: { text: `X* ante perturbación de E_prod (factor = ${factor.toFixed(2)})`, font: { size: 14, color: '#16324f' } },
+    yaxis: { title: 'Concentración X*' },
+    showlegend: false,
+    height: 380
+  });
+}
+
+/* ============================================================
+   BINDINGS
+   ============================================================ */
+function bind(id, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', handler);
+}
+
+bind('s3-YT', updateStep3);
+['Xpre','kprod','Eprod','kdeg','Edeg','kdim','Edim','kdis','Edis','YT'].forEach(k => bind('s4-' + k, updateStep4));
+['Xpre','kprod','Eprod','kdeg','Edeg','kdim','kdis','YT'].forEach(k => bind('s5-' + k, updateStep5));
+['kprod','kdeg','kdim','kdis','YT','X0'].forEach(k => bind('s6-' + k, updateStep6));
+bind('s7-kprod', updateStep7);
+bind('s8-factor', updateStep8);
+
+/* ============================================================
+   SCROLL SPY
+   ============================================================ */
+const sections = document.querySelectorAll('.step');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+sections.forEach(s => observer.observe(s));
+
+/* ============================================================
+   INICIALIZACIÓN
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', () => {
+  updateStep3();
+  updateStep4();
+  updateStep5();
+  updateStep6();
+  updateStep7();
+  updateStep8();
+});
+</script>
+
+</body>
+</html>
